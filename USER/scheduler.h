@@ -10,7 +10,7 @@
 
 void start_task(void *pvParameters);
 
-void led1_task(void *pvParameters);		
+void led_task(void *pvParameters);		
 
 
 #endif

@@ -5,6 +5,8 @@ nmea_msg gpsx; 											//GPS信息
 __align(4) u8 dtbuf[50];   								//打印缓存器
 const u8*fixmode_tbl[4]={"Fail","Fail"," 2D "," 3D "};	//fix mode字符串 
 
+int status_gps = 0;
+
 //显示GPS定位信息 
 void Gps_Msg_Show(void)
 {
@@ -51,10 +53,11 @@ void gps_task(void *pvParameters)
 	for(;;)
 	{
 		CurrentControlTick = xTaskGetTickCount();
-		IWDG_Feed();
-		
+		status_gps = 1;
 		if(USART3_RX_STA&0X8000)		//接收到一次数据了
 		{
+			IWDG_Feed();
+			status_gps = 0;
 			rxlen=USART3_RX_STA&0X7FFF;	//得到数据长度
 			for(i=0;i<rxlen;i++)USART1_TX_BUF[i]=USART3_RX_BUF[i];	   
  			USART3_RX_STA=0;		   	//启动下一次接收

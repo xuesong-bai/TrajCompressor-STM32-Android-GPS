@@ -6,10 +6,10 @@
 TaskHandle_t GPSTask_Handler;
 void GPS_task(void *p_arg);
 
-#define LED1_TASK_PRIO 3
-#define LED1_STK_SIZE 50
-TaskHandle_t LED1Task_Handler;
-void led1_task(void *p_arg);
+#define LED_TASK_PRIO 3
+#define LED_STK_SIZE 50
+TaskHandle_t LEDTask_Handler;
+void led_task(void *p_arg);
 
 void start_task(void *pvParameters)
 {
@@ -21,23 +21,15 @@ void start_task(void *pvParameters)
 							(UBaseType_t    )GPS_TASK_PRIO,
 							(TaskHandle_t*  )&GPSTask_Handler);
 							
-	xTaskCreate((TaskFunction_t )led1_task,
-							(const char*    )"led1_task",
-							(uint16_t       )LED1_STK_SIZE,
+	xTaskCreate((TaskFunction_t )led_task,
+							(const char*    )"led_task",
+							(uint16_t       )LED_STK_SIZE,
 							(void*          )NULL,
-							(UBaseType_t    )LED1_TASK_PRIO,
-							(TaskHandle_t*  )&LED1Task_Handler);
+							(UBaseType_t    )LED_TASK_PRIO,
+							(TaskHandle_t*  )&LEDTask_Handler);
 	vTaskDelete(NULL);
 	taskEXIT_CRITICAL();
 }
 
 
 
-void led1_task(void *pvParameters)
-{
-	while(1)
-	{
-		LED1 =~ LED1;
-		vTaskDelay(500);
-	}
-}

@@ -7,4 +7,4 @@
 void gps_task(void *pvParameters);
 void Gps_Msg_Show(void);
 
-
+extern int status_gps;
