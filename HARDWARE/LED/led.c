@@ -20,4 +20,21 @@ void LED_Init(void)
  GPIO_Init(GPIOE, &GPIO_InitStructure);	  				 //推挽输出 ，IO口速度为50MHz
  GPIO_SetBits(GPIOE,GPIO_Pin_5); 						 //PE.5 输出高 
 }
- 
+
+
+void LED0_on(void)
+{
+	LED0 = 0;
+}
+void LED0_off(void)
+{
+	LED0 = 1;
+}
+void LED1_on(void)
+{
+	LED1 = 0;
+}
+void LED1_off(void)
+{
+	LED1 = 1;
+}

@@ -1,12 +1,16 @@
-#include "sys.h"
-#include "delay.h"
-#include "usart.h"
-#include "led.h"
-#include "FreeRTOS.h"
-#include "task.h"
+#ifndef _SCHEDULER_H_
+#define _SCHEDULER_H_
 
+#include "init.h"
+#include "GPS_Ctrl.h"
+
+#define TRUE	1
+#define FLASE 0
 
 
 void start_task(void *pvParameters);
-void led0_task(void *pvParameters);
+
 void led1_task(void *pvParameters);		
+
+
+#endif
