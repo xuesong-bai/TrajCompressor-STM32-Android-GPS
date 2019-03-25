@@ -67,10 +67,6 @@ void gps_task(void *pvParameters)
 	}
 	
 	
-	/*while(1)
-	{
-		LED0 =~ LED0;
-		vTaskDelay(500);
-	}*/
+
 }
 
