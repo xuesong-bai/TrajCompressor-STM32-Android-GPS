@@ -6,7 +6,7 @@
 TaskHandle_t GPSTask_Handler;
 void GPS_task(void *p_arg);
 
-#define LED_TASK_PRIO 3
+#define LED_TASK_PRIO 4
 #define LED_STK_SIZE 50
 TaskHandle_t LEDTask_Handler;
 void led_task(void *p_arg);

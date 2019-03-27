@@ -73,3 +73,21 @@ void gps_task(void *pvParameters)
 
 }
 
+void gps_Init(void)
+{
+	if(SkyTra_Cfg_Rate(5)!=0)	//设置定位信息更新速度为5Hz,顺便判断GPS模块是否在位. 
+	{
+   	LCD_ShowString(30,120,200,16,16,"SkyTraF8-BD Setting...");
+		do
+		{
+			usart3_init(9600);			//初始化串口3波特率为9600
+	  	SkyTra_Cfg_Prt(3);			//重新设置模块的波特率为38400
+			usart3_init(38400);			//初始化串口3波特率为38400
+      SkyTra_Cfg_Tp(100000);	//脉冲宽度为100ms
+		}while(SkyTra_Cfg_Rate(5)!=0);//配置SkyTraF8-BD的更新速率为5Hz
+	  LCD_ShowString(30,120,200,16,16,"SkyTraF8-BD Set Done!!");
+		delay_ms(10);
+		LCD_Fill(30,120,30+200,120+16,WHITE);//清除显示 
+	}
+}
+

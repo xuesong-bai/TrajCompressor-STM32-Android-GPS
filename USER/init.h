@@ -13,7 +13,6 @@
 #include "sys.h"
 #include "usart.h"
 #include "usmart.h"
-
 #include "OSInclude.h"
 //-------Hardware-------------
 #include "led.h"
@@ -22,6 +21,7 @@
 #include "usart3.h"
 #include "wdg.h"
 #include "gps.h"
+#include "GPS_Ctrl.h"
 
 
 
