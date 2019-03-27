@@ -12,6 +12,7 @@ u8 ctrl_Init(void)
 	LCD_Init();			   		//初始化LCD   
 	KEY_Init();					//初始化按键
 	usart3_init(38400);		//初始化串口3 
+	uart_init(38400);	 //串口初始化为38400
 	LED0_on();
 	LED1_on();
 	
@@ -22,12 +23,14 @@ u8 ctrl_Init(void)
 	LCD_ShowString(30,80,200,16,16,"KEY0:Upload NMEA Data SW");   	 										   	   
   LCD_ShowString(30,100,200,16,16,"NMEA Data Upload:ON"); 
 	
-	/*--------------Watch Dog-------------------*/
-	IWDG_Init(4,2875);    //与分频数为64,重载值为625,溢出时间为1s	  
+
 	
 	/*--------------------GPS-------------------*/
 	gps_Init();
 	
+	
+	/*--------------Watch Dog-------------------*/
+	IWDG_Init(4,2875);    //与分频数为64,重载值为625,溢出时间为1s	  
 	IWDG_Feed();
 	/*------------GPRS + Bluetooth--------------*/
 	

@@ -32,6 +32,10 @@ void NMI_Handler(void)
  
 void HardFault_Handler(void)
 {
+	if (CoreDebug->DHCSR & 1) 
+	{
+		__breakpoint(0);
+	}
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {

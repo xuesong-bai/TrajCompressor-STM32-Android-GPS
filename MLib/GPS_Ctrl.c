@@ -1,6 +1,6 @@
 #include "GPS_Ctrl.h"
 
-u8 USART1_TX_BUF[USART3_MAX_RECV_LEN]; //串口1,发送缓存区
+u8 TX_BUF[USART_REC_LEN];
 nmea_msg gpsx; 											//GPS信息
 __align(4) u8 dtbuf[50];   								//打印缓存器
 const u8*fixmode_tbl[4]={"Fail","Fail"," 2D "," 3D "};	//fix mode字符串 
@@ -49,24 +49,30 @@ void gps_task(void *pvParameters)
 {
 	portTickType CurrentControlTick = 0;
 	u16 i, rxlen;
+	u16 t = 0;
 	
 	for(;;)
 	{
 		CurrentControlTick = xTaskGetTickCount();
-		status_gps = 1;
-		if(USART3_RX_STA&0X8000)		//接收到一次数据了
+		t += 1;
+		if(USART_RX_STA&(1<<15))		//接收到一次数据了
 		{
+			t = 0;
 			IWDG_Feed();
 			status_gps = 0;
-			rxlen=USART3_RX_STA&0X7FFF;	//得到数据长度
-			for(i=0;i<rxlen;i++)USART1_TX_BUF[i]=USART3_RX_BUF[i];	   
- 			USART3_RX_STA=0;		   	//启动下一次接收
-			USART1_TX_BUF[i]=0;			//自动添加结束符
-			GPS_Analysis(&gpsx,(u8*)USART1_TX_BUF);//分析字符串
+			rxlen=USART_RX_STA&0X7FFF;	//得到数据长度
+			for(i=0;i<rxlen;i++)TX_BUF[i]=USART_RX_BUF[i];	   
+ 			USART_RX_STA=0;		   	//启动下一次接收
+			TX_BUF[i]=0;			//自动添加结束符
+			GPS_Analysis(&gpsx,(u8*)TX_BUF);//分析字符串
 			Gps_Msg_Show();				//显示信息	
  		}
-		
-		vTaskDelayUntil(&CurrentControlTick, 1000 / portTICK_RATE_MS);
+		if(t>50)
+		{
+			status_gps = 1;
+		}
+		//vTaskDelay(10);
+		vTaskDelayUntil(&CurrentControlTick, 1);
 	}
 	
 	
@@ -80,13 +86,12 @@ void gps_Init(void)
    	LCD_ShowString(30,120,200,16,16,"SkyTraF8-BD Setting...");
 		do
 		{
-			usart3_init(9600);			//初始化串口3波特率为9600
+			uart_init(9600);			//初始化串口3波特率为9600
 	  	SkyTra_Cfg_Prt(3);			//重新设置模块的波特率为38400
-			usart3_init(38400);			//初始化串口3波特率为38400
+			uart_init(38400);			//初始化串口3波特率为38400
       SkyTra_Cfg_Tp(100000);	//脉冲宽度为100ms
 		}while(SkyTra_Cfg_Rate(5)!=0);//配置SkyTraF8-BD的更新速率为5Hz
 	  LCD_ShowString(30,120,200,16,16,"SkyTraF8-BD Set Done!!");
-		delay_ms(10);
 		LCD_Fill(30,120,30+200,120+16,WHITE);//清除显示 
 	}
 }

@@ -708,6 +708,11 @@
               <FileType>1</FileType>
               <FilePath>..\MLib\GPS_Ctrl.c</FilePath>
             </File>
+            <File>
+              <FileName>LED_Ctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MLib\LED_Ctrl.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

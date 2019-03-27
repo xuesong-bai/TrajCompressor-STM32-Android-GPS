@@ -1,4 +1,3 @@
-#include "usart3.h"
 #include "gps.h"
 #include "wdg.h"
 #include "OSInclude.h"

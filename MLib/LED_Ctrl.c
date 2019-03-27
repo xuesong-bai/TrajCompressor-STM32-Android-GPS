@@ -3,8 +3,10 @@
 
 void led_task(void *pvParameters)
 {
-	while(1)
+	for(;;)
 	{
+		
+		
 		if(status_gps == 0)
 		{
 			LED0_off();
