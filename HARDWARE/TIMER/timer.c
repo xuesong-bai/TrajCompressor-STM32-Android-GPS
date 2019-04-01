@@ -16,6 +16,16 @@
 extern vu16 USART3_RX_STA;
 extern vu16 USART_RX_STA;
 
+//配置TIM7预装载周期值
+void TIM7_SetARR(u16 period)
+{
+	 TIM_SetCounter(TIM7,0);//计数器清空
+	 TIM7->ARR&=0x00;       //先清预装载周期值为0
+	 TIM7->ARR|= period;    //更新预装载周期值
+	 
+}
+
+
 //定时器7中断服务程序		    
 void TIM7_IRQHandler(void)
 { 	

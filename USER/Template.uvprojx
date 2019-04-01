@@ -170,12 +170,12 @@
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
-            <Capability>0</Capability>
-            <DriverSelection>-1</DriverSelection>
+            <Capability>1</Capability>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\USMART;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -681,26 +681,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>USMART</GroupName>
-          <Files>
-            <File>
-              <FileName>usmart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart_config.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_str.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart_str.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>MLib</GroupName>
           <Files>
             <File>
@@ -712,6 +692,16 @@
               <FileName>LED_Ctrl.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MLib\LED_Ctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>BL_GPRS_Ctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MLib\BL_GPRS_Ctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>time_shift.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MLib\time_shift.c</FilePath>
             </File>
           </Files>
         </Group>

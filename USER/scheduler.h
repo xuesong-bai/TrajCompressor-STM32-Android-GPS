@@ -1,5 +1,5 @@
-#ifndef _SCHEDULER_H_
-#define _SCHEDULER_H_
+#ifndef __SCHEDULER__
+#define __SCHEDULER__
 
 #include "init.h"
 #include "GPS_Ctrl.h"

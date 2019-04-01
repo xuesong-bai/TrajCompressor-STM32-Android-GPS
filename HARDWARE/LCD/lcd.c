@@ -717,7 +717,7 @@ void LCD_Init(void)
 			}
  		}  	
 	} 
- 	printf(" LCD ID:%x\r\n",lcddev.id); //打印LCD ID   
+ 	//printf(" LCD ID:%x\r\n",lcddev.id); //打印LCD ID   
 	if(lcddev.id==0X9341)	//9341初始化
 	{	 
 		LCD_WR_REG(0xCF);  
@@ -2891,7 +2891,7 @@ void LCD_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size,u8 *p)
     while((*p<='~')&&(*p>=' '))//判断是不是非法字符!
     {       
         if(x>=width){x=x0;y+=size;}
-        if(y>=height)break;//退出
+        if(y>=height){break;}//退出
         LCD_ShowChar(x,y,*p,size,0);
         x+=size/2;
         p++;

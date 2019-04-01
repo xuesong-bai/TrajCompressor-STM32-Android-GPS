@@ -32,10 +32,12 @@ void NMI_Handler(void)
  
 void HardFault_Handler(void)
 {
+	
 	if (CoreDebug->DHCSR & 1) 
 	{
 		__breakpoint(0);
 	}
+	NVIC_SystemReset();
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
@@ -83,6 +85,15 @@ void DebugMon_Handler(void)
 //{
 //}
 
+
+//static __INLINE void NVIC_SystemReset(void)
+//{
+//  SCB->AIRCR  = ((0x5FA << SCB_AIRCR_VECTKEY_Pos)      | 
+//                 (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) | 
+//                 SCB_AIRCR_SYSRESETREQ_Msk);                   /* Keep priority group unchanged */
+//  __DSB();                                                     /* Ensure completion of memory access */              
+//  while(1);                                                    /* wait until reset */
+//}
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
