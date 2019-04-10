@@ -70,7 +70,7 @@ int GetKey (void)  {
 }
 */
  
-#if EN_USART1_RX   //如果使能了接收
+//#if EN_USART1_RX   //如果使能了接收
 //串口1中断服务程序
 //注意,读取USARTx->SR能避免莫名其妙的错误   	
 u8 USART_TX_BUF[USART_SEND_LEN];
@@ -87,7 +87,7 @@ void uart_init(u32 bound){
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 	
 	USART_DeInit(USART1);
@@ -102,16 +102,7 @@ void uart_init(u32 bound){
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;//PA10
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//浮空输入
   GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.10  
-
-  //Usart1 NVIC 配置
-  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3 ;//抢占优先级3
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;		//子优先级3
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
-	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器
-  
-   //USART 初始化设置
-
+  //USART 初始化设置
 	USART_InitStructure.USART_BaudRate = bound;//串口波特率
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
@@ -119,14 +110,20 @@ void uart_init(u32 bound){
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 
-  USART_Init(USART1, &USART_InitStructure); //初始化串口1
-  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//开启串口接受中断
-  USART_Cmd(USART1, ENABLE);                    //使能串口1 
-	
-	
-	TIM5_Int_Init(1000-1,7200-1);		//10ms中断
+USART_Init(USART1, &USART_InitStructure); //初始化串口1
+USART_Cmd(USART1, ENABLE);                    //使能串口1 
+USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//开启串口接受中断
+
+  //Usart1 NVIC 配置
+  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3 ;//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;		//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
+	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器
+
+	TIM6_Int_Init(1000-1,7200-1);		//10ms中断
 	USART_RX_STA=0;		//清零
-	TIM_Cmd(TIM5,DISABLE);			//关闭定时器7
+	TIM_Cmd(TIM6,DISABLE);			//关闭定时器7
 
 }
 
@@ -141,10 +138,10 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 			{
 				if(USART_RX_STA<USART_REC_LEN)
 				{
-					TIM_SetCounter(TIM5, 0);
+					TIM_SetCounter(TIM6, 0);
 					if(USART_RX_STA==0)
 					{
-						TIM_Cmd(TIM5, ENABLE);
+						TIM_Cmd(TIM6, ENABLE);
 					}
 					USART_RX_BUF[USART_RX_STA++]=res;
 				}else
@@ -218,5 +215,5 @@ void u1_printf(char* fmt,...)
 }
 
 
-#endif	
+//#endif	
 

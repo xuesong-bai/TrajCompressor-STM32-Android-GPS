@@ -27,7 +27,7 @@
 //V1.5修改说明
 //1,增加了对UCOSII的支持
 #define USART_SEND_LEN      600
-#define USART_REC_LEN  			600  	//定义最大接收字节数 200
+#define USART_REC_LEN  			800  	//定义最大接收字节数 200
 #define EN_USART1_RX 			1		//使能（1）/禁止（0）串口1接收
 	  	
 extern u8  USART_TX_BUF[USART_SEND_LEN];

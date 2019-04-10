@@ -5,51 +5,160 @@ u8 Scan_Wtime = 0;//保存蓝牙扫描需要的时间
 u8 BT_Scan_mode=0; //蓝牙扫描设备模式标志
 
 __align(4) u8 dtbuff[50];
+//u8 USART3_RX_BUFF[USART3_MAX_RECV_LEN];
+//u8 hold_flag = 0;
 
 
 void BL_GPRS_SEND_task(void *pvParameters)
 {
 	portTickType CurrentControlTick = 0;
+	const TickType_t TimeIncrement = pdMS_TO_TICKS(1000);
 	//u16 i, rxlen;
-	u16 t = 0;
+//	u16 timex = 0;
+	u8 sendbuf[20];
+	u8 sendcnt=0;	
+	u8 res;
 	//u8 key;
 	//int connect;
+//	hold_flag = 1;
+	sim800c_send_cmd("ATE1","OK",200);
+//	hold_flag = 0;
+//	USART3_RX_STA=0;
 	
 	for(;;)
 	{
 		CurrentControlTick = xTaskGetTickCount();
-		t += 1;
+//		timex++;
+//		if(timex%50==0)
+//		  {  
+//			  timex=0;
+//		    USART3_RX_STA=0;
+//		hold_flag = 1;
+			  res = sim800c_send_cmd("AT+BTSPPSEND",">",100);//发送数据
+//		hold_flag = 0;		
+//		USART3_RX_STA=0;
+				if(res==1)
+				{
+					LCD_Fill(30,520,330,540,WHITE);           
+					LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
+				}
+				else
+				{
+					LCD_Fill(30,520,330,540,WHITE);           
+				}
+			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
+			  sendcnt++;
+			  if(sendcnt>99) sendcnt = 0;
+//			  USART3_RX_STA=0;
+//				hold_flag = 1;
+				res = sim800c_send_cmd((u8*)sendbuf,"OK",100);//发送数据
+//			  hold_flag = 0;
+//				USART3_RX_STA=0;
+				if(res==0)
+			  {
+				 LCD_ShowString(30,560,300,16,16,(u8*)sendbuf);//显示发送的数据
+			  }
+			  else
+			  {
+				 LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
+					//Show_Str(40,30+60,200,16,"蓝牙连接断开         ",16,0);
+				 //LCD_Fill(10,140,240,320,WHITE);//清屏
+//				 delay_ms(1000);
+//				 delay_ms(1000);
+//				 delay_ms(1000);
+//				 if (CoreDebug->DHCSR & 1) 
+//			   {
+//						__breakpoint(0);
+//	    		}
+//	  			NVIC_SystemReset();
+			  }
+//		 }
+		
 		//sim_at_response(1);	//检查GSM模块发送过来的数据
-		if(t>100)
-		{
-			t = 0;
-		}
 
 		//vTaskDelay(10);
-		vTaskDelayUntil(&CurrentControlTick, 100 / portTICK_RATE_MS);
+		vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
 	}
 
 }
 void BL_GPRS_REC_task(void *pvParameters)
 {
-	portTickType CurrentControlTick = 0;
+	portTickType CurrentControlTick;
+	const TickType_t TimeIncrement = pdMS_TO_TICKS(1);
 	//u16 i, rxlen;
-	u16 t = 0;
+//	u16 t = 0;
 	//u8 key;
 	//int connect;
+  u8 *p1,*p2, *p3;
 	
 	for(;;)
 	{
+		IWDG_Feed();
 		CurrentControlTick = xTaskGetTickCount();
-		t += 1;
+//		if(hold_flag==0)
+//		{
+		if(USART3_RX_STA&0x8000)
+			{  
+				p3 =(u8*)strstr((const char*)USART3_RX_BUF,"AT");
+				if(p3==NULL)
+				{
+					p3 =(u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
+					if(p3!=NULL)
+					{
+				
+				USART3_RX_BUF[USART3_RX_STA&0X7FFF]=0;//添加结束符
+				USART3_RX_STA=0;
+				sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+		    LCD_ShowString(30,600,300,16,16,dtbuff);
+				p1 =(u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
+				if(p1!=NULL)
+				{
+					p2 = (u8*)strstr((const char *)p1,"\x0d\x0a"); 
+					if(p2!= NULL) 
+					{
+						 p2 =(u8*)strstr((const char *)p1,",");
+						 p1 =(u8*)strstr((const char *)p2+1,",");
+					  // printf("接收到的数据是：");
+					  // printf("%s\r\n",p1+1);//打印到串口
+						 LCD_Fill(30,540,330,560,WHITE);                       //清除显示
+						 //LCD_ShowString(90,200,150,119,16,(u8*)(p1+1));						//显示接收到的数据
+						LCD_ShowString(30,540,300,16,16,(u8*)(p1+1));
+					}
+				}
+				else 
+				{
+					p1 =(u8*)strstr((const char*)USART3_RX_BUF,"+BTDISCONN: ");//判断是否断开连接
+					if(p1!=NULL)
+					{
+						LCD_ShowString(30,540,300,16,16,"BlueTooth Disconnect.");
+						//Show_Str(40,30+60,200,16,"BlueTooth Disconnect.",16,0);
+						//LCD_Fill(10,140,240,320,WHITE);                        //清屏
+//						delay_ms(1000);
+//						delay_ms(1000);
+//						delay_ms(1000);						//退出  
+//						if (CoreDebug->DHCSR & 1) 
+//						{
+//							__breakpoint(0);
+//						}
+//						NVIC_SystemReset();
+					}						 
+				}
+		  }
+				}
+				}
+		
+		
+//		}
+			
+//		t += 1;
 		//sim_at_response(1);	//检查GSM模块发送过来的数据
-		if(t>100)
-		{
-			t = 0;
-		}
+//		if(t>5000)
+//		{
+//			t = 0;
+//		}
 
 		//vTaskDelay(10);
-		vTaskDelayUntil(&CurrentControlTick, 100 / portTICK_RATE_MS);
+		vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
 	}
 
 }
@@ -72,7 +181,10 @@ u8 connect_BL()
 		 status = 1;
 		  return status;
 	 }			
-	 sim800c_send_cmd("AT+BTUNPAIR=0","AT",100);//删除配对信息				 
+	 do
+	 {
+		 res = sim800c_send_cmd("AT+BTUNPAIR=0","AT",100);//删除配对信息				 
+	 }while(res==1);
 	 do
 	{		
 		LCD_ShowString(30,480,300,16,16,"Waiting for CON request");	   
@@ -97,29 +209,33 @@ u8 connect_BL()
 	    }while(1);
 					if(!sim800c_send_cmd("AT+BTACPT=1","+BTCONNECT:",300))//应答手机端spp连接请求 3S
 	    {
+			 LCD_Fill(30,500,330,520,WHITE);
 		   LCD_ShowString(30,500,300,16,16,"SSP connected...");
 	    }
 	    else  
 	    {
 		   LCD_ShowString(30,500,300,16,16,"SSP Failed...");
 		 status = 2;
-		  return status;
 	    }
+			sim800c_send_cmd("ATE1","OK",200);
+			USART3_RX_STA=0;
+	//sim800c_send_cmd("ATE0","OK",200);//关闭回显功能
 	return status;
 }
 
 u8 BL_GPRS_Init()
 {
 	u8 status = 0;
-	u8 key=0; 
 	u8 res;
+	POINT_COLOR=BLACK;
 	LCD_ShowString(30,100,300,16,16,"GPRS-BlueTooth Setting...");
 	while(sim800c_send_cmd("AT","OK",100))
 	{
+		sim800c_send_cmd("ATE0","OK",200);
 		delay_ms(400);
 	}
 	LCD_ShowString(30,100,300,16,16,"GPRS-BlueTooth Set Done!!");
-	key+=sim800c_send_cmd("ATE0","OK",200);//不回显
+	sim800c_send_cmd("ATE0","OK",200);//不回显
 	USART3_RX_STA=0;
 	
 	delay_ms(50);
@@ -128,12 +244,13 @@ u8 BL_GPRS_Init()
 	{
 		res = connect_BL();
 		sprintf((char *)dtbuff, "BL result: %i", res);
-		LCD_ShowString(30,100,300,16,16,dtbuff);
+		LCD_ShowString(30,520,300,16,16,dtbuff);
 	}while(res==2);
 	if(res==1)
 	{
 		status = 1;
 	}
+	sim800c_send_cmd("ATE1","OK",200);
 	return status;
 }
 void BL_GPRS_Msg_Show()
@@ -145,6 +262,7 @@ void BL_GPRS_Msg_Show()
 	POINT_COLOR=BLUE;
 	USART3_RX_STA=0;
 	res = sim800c_send_cmd("AT+CGMI","OK",200);
+	USART3_RX_STA=0;	
 	if(res==0)	//查询制造商名称
 	{ 
 		p1=(u8*)strstr((const char*)(USART3_RX_BUF+2),"\r\n");
@@ -154,7 +272,9 @@ void BL_GPRS_Msg_Show()
 		LCD_ShowString(30,400,300,16,16,dtbuff);
 		USART3_RX_STA=0;		
 	} 
+	delay_ms(10);
 	res = sim800c_send_cmd("AT+CGMM","OK",200);
+	USART3_RX_STA=0;	
 	if(res==0)//查询模块名字
 	{ 
 		p1=(u8*)strstr((const char*)(USART3_RX_BUF+2),"\r\n"); 
@@ -164,7 +284,9 @@ void BL_GPRS_Msg_Show()
 		LCD_ShowString(30,420,300,16,16,dtbuff);
 		USART3_RX_STA=0;		
 	} 
+	delay_ms(10);
 	res = sim800c_send_cmd("AT+CGSN","OK",200);
+	USART3_RX_STA=0;	
 	if(res==0)//查询产品序列号
 	{ 
 		p1=(u8*)strstr((const char*)(USART3_RX_BUF+2),"\r\n");//查找回车
@@ -174,7 +296,31 @@ void BL_GPRS_Msg_Show()
 		LCD_ShowString(30,440,300,16,16,dtbuff);
 		USART3_RX_STA=0;		
 	}
-	res = sim800c_send_cmd("AT+CNUM","+CNUM",200);
+	do{
+		delay_ms(10);
+		USART3_RX_STA=0;
+	  res = sim800c_send_cmd("AT+CPIN?","OK",200);	//查询SIM卡是否在位 
+	  sprintf((char *)dtbuff, "SIM result: %i", res);
+		LCD_ShowString(30,660,300,16,16,dtbuff);
+		USART3_RX_STA=0;
+	}while(res == 1);
+	do{
+		delay_ms(10);
+		USART3_RX_STA=0;
+	  res = sim800c_send_cmd("AT+COPS?","OK",200);	//查询运营商名字
+		sprintf((char *)dtbuff, "ISP result: %i", res);
+		LCD_ShowString(30,680,300,16,16,dtbuff);
+	  USART3_RX_STA=0;
+	}while(res == 1);
+	delay_ms(10);
+	do{
+delay_ms(10);
+		USART3_RX_STA=0;
+		res = sim800c_send_cmd("AT+CNUM","+CNUM",200);
+		sprintf((char *)dtbuff, "NUM result: %i", res);
+		LCD_ShowString(30,680,300,16,16,dtbuff);
+	  USART3_RX_STA=0;
+	}while(res == 1);
 	if(res==0)//查询本机号码
 	{
 		p1=(u8*)strstr((const char*)(USART3_RX_BUF),",");
@@ -202,7 +348,6 @@ void BL_GPRS_Msg_Show()
 //}
 
 
-
 //SIM800C发送命令
 //cmd:发送的命令字符串(不需要添加回车了),当cmd<0XFF的时候,发送数字(比如发送0X1A),大于的时候发送字符串.
 //ack:期待的应答结果,如果为空,则表示不需要等待应答
@@ -212,12 +357,17 @@ void BL_GPRS_Msg_Show()
 u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 {
 	u8 res=0; 
+	u8 *p1;
+//	u8 i;
 	USART3_RX_STA=0;
 	if((u32)cmd<=0XFF)
 	{
 		while((USART3->SR&0X40)==0);//等待上一次数据发送完成  
 		USART3->DR=(u32)cmd;
 	}else u3_printf("%s\r\n",cmd);//发送命令
+	LCD_Fill(30, 620, 330, 640, WHITE);
+	sprintf((char *)dtbuff,"%s",cmd);
+	LCD_ShowString(30,620,300,16,16,dtbuff);
 	
 	if(waittime==1100)//11s后读回串口数据(蓝牙扫描模式)
 	{
@@ -229,16 +379,25 @@ u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 	{
 	   while(--waittime)	//等待倒计时
 	   { 
-		  if(BT_Scan_mode)//蓝牙扫描模式
-		  {  
-			  res=KEY_Scan(0);//返回上一级
-			  if(res==WKUP_PRES)return 2;
-		  }
+//		  if(BT_Scan_mode)//蓝牙扫描模式
+//		  {  
+//			  res=KEY_Scan(0);//返回上一级
+//			  if(res==WKUP_PRES)return 2;
+//		  }
 		  delay_ms(10);
 		  if(USART3_RX_STA&0X8000)//接收到期待的应答结果
 		  {
 			  if(sim800c_check_cmd(ack))break;//得到有效数据 
-			  USART3_RX_STA=0;
+//			  p1 = (u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
+//				if(p1!=NULL)
+//				{
+////					for(i = 0;i<USART3_MAX_RECV_LEN;i++)
+////					{
+////						USART3_RX_BUFF[i] = USART3_RX_BUF[i];
+////					}
+//					delay_ms(10);
+//				}
+				USART3_RX_STA=0;
 		  } 
 	   }
 	   if(waittime==0)res=1; 
@@ -252,6 +411,10 @@ u8* sim800c_check_cmd(u8 *str)
 	{ 
 		USART3_RX_BUF[USART3_RX_STA&0X7FFF]=0;//添加结束符
 		strx=strstr((const char*)USART3_RX_BUF,(const char*)str);
+		LCD_Fill(30, 600, 330, 620, WHITE);
+		sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+		LCD_ShowString(30,600,300,16,16,dtbuff);
+		
 	} 
 	return (u8*)strx;
 }
@@ -264,13 +427,13 @@ u8* sim800c_check_cmd(u8 *str)
 u8 sim800c_wait_request(u8 *request ,u16 waittime)
 {
 	 u8 res = 1;
-	 u8 key;
+//	 u8 key;
 	 if(request && waittime)
 	 {
 	    while(--waittime)
 		{   
-		   key=KEY_Scan(0);
-		   if(key==WKUP_PRES) return 2;//返回上一级
+//		   key=KEY_Scan(0);
+//		   if(key==WKUP_PRES) return 2;//返回上一级
 		   delay_ms(10);
 		   if(USART3_RX_STA &0x8000)//接收到期待的应答结果
 		   {

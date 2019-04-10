@@ -54,18 +54,22 @@ void Gps_Msg_Show(void)
 
 void gps_task(void *pvParameters)
 {
-	portTickType CurrentControlTick = 0;
+	portTickType CurrentControlTick;
+	const TickType_t TimeIncrement = pdMS_TO_TICKS(1);
 	u16 i, rxlen;
 	u16 t = 0;
+	
 	
 	for(;;)
 	{
 		CurrentControlTick = xTaskGetTickCount();
 		t += 1;
+		USART_RX_STA = 0;
+//		while(USART_RX_STA == 0);
 		if(USART_RX_STA&(1<<15))		//接收到一次数据了
 		{
 			t = 0;
-			IWDG_Feed();
+//			IWDG_Feed();
 			status_gps = 0;
 			rxlen=USART_RX_STA&0X7FFF;	//得到数据长度
 			for(i=0;i<rxlen;i++)TX_BUF[i]=USART_RX_BUF[i];	   
@@ -74,30 +78,47 @@ void gps_task(void *pvParameters)
 			GPS_Analysis(&gpsx,(u8*)TX_BUF);//分析字符串
 			time_transfer();
 			Gps_Msg_Show();				//显示信息	
+			USART_RX_STA = 0;
  		}
 		if(t>1000)
 		{
 			status_gps = 1;
 		}
 		//vTaskDelay(10);
-		vTaskDelayUntil(&CurrentControlTick, 1 / portTICK_RATE_MS);
+		vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
 	}
 }
 
 void gps_Init(void)
 {
-	if(SkyTra_Cfg_Rate(5)!=0)	//设置定位信息更新速度为5Hz,顺便判断GPS模块是否在位. 
+	u8 flag, flag1;
+	POINT_COLOR=BLACK;
+	flag = SkyTra_Cfg_Rate(5);
+	if(flag!=0)	//设置定位信息更新速度为5Hz,顺便判断GPS模块是否在位. 
 	{
    	LCD_ShowString(30,80,200,16,16,"SkyTraF8-BD Setting...");
 		do
 		{
 			uart_init(9600);			//初始化串口3波特率为9600
-	  	SkyTra_Cfg_Prt(3);			//重新设置模块的波特率为38400
-			uart_init(38400);			//初始化串口3波特率为38400
-      SkyTra_Cfg_Tp(100000);	//脉冲宽度为100ms
-		}while(SkyTra_Cfg_Rate(5)!=0);//配置SkyTraF8-BD的更新速率为5Hz
+	  	flag1 = SkyTra_Cfg_Prt(5);			//重新设置模块的波特率为38400
+			uart_init(115200);			//初始化串口3波特率为38400
+      flag1 = SkyTra_Cfg_Prt(5);
+			SkyTra_Cfg_Tp(100000);	//脉冲宽度为100ms
+			flag = SkyTra_Cfg_Rate(5);
+		}while(flag!=0);//配置SkyTraF8-BD的更新速率为5Hz
 		//LCD_Fill(30,120,30+200,120+16,WHITE);//清除显示 
 	}
+//	if(SkyTra_Cfg_Rate(5)!=0)	//设置定位信息更新速度为5Hz,顺便判断GPS模块是否在位. 
+//	{
+//   	LCD_ShowString(30,120,200,16,16,"SkyTraF8-BD Setting...");
+//		do
+//		{
+//			uart_init(9600);			//初始化串口3波特率为9600
+//	  	SkyTra_Cfg_Prt(5);			//重新设置模块的波特率为38400
+//			uart_init(115200);			//初始化串口3波特率为38400
+//      flag = SkyTra_Cfg_Tp(100000);	//脉冲宽度为100ms
+//		}while(SkyTra_Cfg_Rate(5)!=0&&flag!=0);//配置SkyTraF8-BD的更新速率为5Hz
+//	}
 	LCD_ShowString(30,80,200,16,16,"SkyTraF8-BD Set Done!!");
 }
 void time_transfer()

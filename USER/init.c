@@ -12,11 +12,10 @@ u8 ctrl_Init(void)
 	LCD_Init();			   		//初始化LCD   
 	KEY_Init();					//初始化按键
 	usart3_init(115200);		//初始化串口3 
-	
 	LED0_on();
 	LED1_on();
 	
-	
+	LCD_Clear(WHITE);  
 	LCD_ShowString(30,20,200,16,16,"STM32F1 ^_^");	  
 	LCD_ShowString(30,40,200,16,16,"GPS + BL + GPRS TEST");	
 	LCD_ShowString(30,60,200,16,16,"Xuesong Bai 2019.03");
@@ -25,22 +24,23 @@ u8 ctrl_Init(void)
 	
 	
 	/*------------GPRS + Bluetooth--------------*/
-	do
-	{
-		status = BL_GPRS_Init();
-	}while(status==1);
+//	do
+//	{
+//		status = BL_GPRS_Init();
+//	}while(status==1);
 	
 	/*--------------Watch Dog-------------------*/
-	IWDG_Init(4,2875);    //与分频数为64,重载值为625,溢出时间为1s	  
+	//IWDG_Init(4,5750);    //与分频数为64,重载值为625,溢出时间为1s	  
 	
 	/*--------------------GPS-------------------*/
-	uart_init(38400);	 //串口初始化为38400
+	uart_init(115200);	 //串口初始化为38400
 	gps_Init();
 	
-	IWDG_Feed();
+	//IWDG_Feed();
 	/*-------------------END--------------------*/
 	status = 1;
 	LED0_off();
 	LED1_off();
+	delay_ms(5000);
 	return status;
 }

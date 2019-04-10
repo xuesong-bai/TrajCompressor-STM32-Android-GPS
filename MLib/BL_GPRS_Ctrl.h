@@ -20,6 +20,7 @@ u8 connect_BL(void);
 u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime);
 u8* sim800c_check_cmd(u8 *str);
 u8 sim800c_wait_request(u8 *request ,u16 waittime);
+u8 sim800c_gsm_info(void);
 
 
 #endif
