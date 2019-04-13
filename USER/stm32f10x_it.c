@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    GPIO/IOToggle/stm32f10x_it.c 
+  * @file    GPIO/IOToggle/stm32f10x_it.c
   * @author  MCD Application Team
   * @version V3.5.0
   * @date    08-April-2011
@@ -22,65 +22,65 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f10x_it.h" 
+#include "stm32f10x_it.h"
 
 
- 
+
 void NMI_Handler(void)
 {
 }
- 
+
 void HardFault_Handler(void)
 {
-	
-	if (CoreDebug->DHCSR & 1) 
-	{
-		__breakpoint(0);
-	}
+
+    if (CoreDebug->DHCSR & 1)
+    {
+        __breakpoint(0);
+    }
 //	NVIC_SystemReset();
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
-}
- 
-void MemManage_Handler(void)
-{
-  /* Go to infinite loop when Memory Manage exception occurs */
-  while (1)
-  {
-  }
+    /* Go to infinite loop when Hard Fault exception occurs */
+    while (1)
+    {
+    }
 }
 
- 
+void MemManage_Handler(void)
+{
+    /* Go to infinite loop when Memory Manage exception occurs */
+    while (1)
+    {
+    }
+}
+
+
 void BusFault_Handler(void)
 {
-  /* Go to infinite loop when Bus Fault exception occurs */
-  while (1)
-  {
-  }
+    /* Go to infinite loop when Bus Fault exception occurs */
+    while (1)
+    {
+    }
 }
- 
+
 void UsageFault_Handler(void)
 {
-  /* Go to infinite loop when Usage Fault exception occurs */
-  while (1)
-  {
-  }
+    /* Go to infinite loop when Usage Fault exception occurs */
+    while (1)
+    {
+    }
 }
- 
+
 //void SVC_Handler(void)
 //{
 //}
- 
+
 void DebugMon_Handler(void)
 {
 }
- 
+
 //void PendSV_Handler(void)
 //{
 //}
- 
+
 //void SysTick_Handler(void)
 //{
 //}
@@ -88,10 +88,10 @@ void DebugMon_Handler(void)
 
 //static __INLINE void NVIC_SystemReset(void)
 //{
-//  SCB->AIRCR  = ((0x5FA << SCB_AIRCR_VECTKEY_Pos)      | 
-//                 (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) | 
+//  SCB->AIRCR  = ((0x5FA << SCB_AIRCR_VECTKEY_Pos)      |
+//                 (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
 //                 SCB_AIRCR_SYSRESETREQ_Msk);                   /* Keep priority group unchanged */
-//  __DSB();                                                     /* Ensure completion of memory access */              
+//  __DSB();                                                     /* Ensure completion of memory access */
 //  while(1);                                                    /* wait until reset */
 //}
 /******************************************************************************/

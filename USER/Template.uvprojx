@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART2;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -419,11 +419,6 @@
               <FilePath>.\stm32f10x_it.c</FilePath>
             </File>
             <File>
-              <FileName>system_stm32f10x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_stm32f10x.c</FilePath>
-            </File>
-            <File>
               <FileName>scheduler.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\scheduler.c</FilePath>
@@ -432,6 +427,11 @@
               <FileName>init.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\init.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f10x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\system_stm32f10x.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -492,6 +492,11 @@
               <FileName>wdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\WDG\wdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\USART2\usart2.c</FilePath>
             </File>
           </Files>
         </Group>

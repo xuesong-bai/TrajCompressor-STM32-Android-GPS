@@ -1,7 +1,7 @@
 #include "gps.h" 
 #include "led.h" 
 #include "delay.h" 								   
-#include "usart.h" 								   
+#include "usart2.h" 								   
 #include "stdio.h"	 
 #include "stdarg.h"	 
 #include "string.h"	 
@@ -266,18 +266,18 @@ u8 SkyTra_Cfg_Ack_Check(void)
 {			 
 	u16 len=0,i;
 	u8 rval=0;
-	while((USART_RX_STA&0X8000)==0 && len<100)//等待接收到应答   
+	while((USART2_RX_STA&0X8000)==0 && len<100)//等待接收到应答   
 	{
 		len++;
 		delay_ms(5);
 	}		 
 	if(len<100)   	//超时错误.
 	{
-		len=USART_RX_STA&0X7FFF;	//此次接收到的数据长度 
+		len=USART2_RX_STA&0X7FFF;	//此次接收到的数据长度 
 		for(i=0;i<len;i++)
 		{
-			if(USART_RX_BUF[i]==0X83)break;
-			else if(USART_RX_BUF[i]==0X84)
+			if(USART2_RX_BUF[i]==0X83)break;
+			else if(USART2_RX_BUF[i]==0X84)
 			{
 				rval=3;
 				break;
@@ -285,7 +285,7 @@ u8 SkyTra_Cfg_Ack_Check(void)
 		}
 		if(i==len)rval=2;						//没有找到同步字符
 	}else rval=1;								//接收超时错误
-    USART_RX_STA=0;							//清除接收
+    USART2_RX_STA=0;							//清除接收
 	return rval;  
 }
 //配置SkyTra_GPS/北斗模块波特率
@@ -293,7 +293,7 @@ u8 SkyTra_Cfg_Ack_Check(void)
 //返回值:0,执行成功;其他,执行失败(这里不会返回0了)
 u8 SkyTra_Cfg_Prt(u8 baud_id)
 {
-	SkyTra_baudrate *cfg_prt=(SkyTra_baudrate *)USART_TX_BUF;
+	SkyTra_baudrate *cfg_prt=(SkyTra_baudrate *)USART2_TX_BUF;
 	cfg_prt->sos=0XA1A0;		//引导序列(小端模式)
 	cfg_prt->PL=0X0400;			//有效数据长度(小端模式)
 	cfg_prt->id=0X05;		    //配置波特率的ID 
@@ -304,7 +304,7 @@ u8 SkyTra_Cfg_Prt(u8 baud_id)
 	cfg_prt->end=0X0A0D;        //发送结束符(小端模式)
 	SkyTra_Send_Date((u8*)cfg_prt,sizeof(SkyTra_baudrate));//发送数据给SkyTra   
 	delay_ms(200);				//等待发送完成 
-	uart_init(BAUD_id[baud_id]);	//重新初始化串口3  
+	usart2_init(BAUD_id[baud_id]);	//重新初始化串口3  
 	return SkyTra_Cfg_Ack_Check();//这里不会反回0,因为UBLOX发回来的应答在串口重新初始化的时候已经被丢弃了.
 } 
 //配置SkyTra_GPS模块的时钟脉冲宽度
@@ -313,7 +313,7 @@ u8 SkyTra_Cfg_Prt(u8 baud_id)
 u8 SkyTra_Cfg_Tp(u32 width)
 {
 	u32 temp=width;
-	SkyTra_pps_width *cfg_tp=(SkyTra_pps_width *)USART_TX_BUF;
+	SkyTra_pps_width *cfg_tp=(SkyTra_pps_width *)USART2_TX_BUF;
 	temp=(width>>24)|((width>>8)&0X0000FF00)|((width<<8)&0X00FF0000)|((width<<24)&0XFF000000);//小端模式
 	cfg_tp->sos=0XA1A0;		    //cfg header(小端模式)
 	cfg_tp->PL=0X0700;        //有效数据长度(小端模式)
@@ -331,7 +331,7 @@ u8 SkyTra_Cfg_Tp(u32 width)
 //返回值:0,发送成功;其他,发送失败.
 u8 SkyTra_Cfg_Rate(u8 Frep)
 {
-	SkyTra_PosRate *cfg_rate=(SkyTra_PosRate *)USART_TX_BUF;
+	SkyTra_PosRate *cfg_rate=(SkyTra_PosRate *)USART2_TX_BUF;
  	cfg_rate->sos=0XA1A0;	    //cfg header(小端模式)
 	cfg_rate->PL=0X0300;			//有效数据长度(小端模式)
 	cfg_rate->id=0X0E;	      //cfg rate id
@@ -350,8 +350,8 @@ void SkyTra_Send_Date(u8* dbuf,u16 len)
 	u16 j;
 	for(j=0;j<len;j++)//循环发送数据
 	{
-		while((USART1->SR&0X40)==0);//循环发送,直到发送完毕   
-		USART1->DR=dbuf[j];  
+		while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
+		USART2->DR=dbuf[j];  
 	}	
 }
 

@@ -19,9 +19,6 @@ void TIM7_SetARR(u16 period);
 void TIM7_IRQHandler(void);
 
 
-void TIM5_Int_Init(u16 arr,u16 psc);
-void TIM5_IRQHandler(void);
-
 void TIM6_SetARR(u16 period);
 void TIM6_IRQHandler(void);
 void TIM6_Int_Init(u16 arr,u16 psc);

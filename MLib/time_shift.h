@@ -4,10 +4,14 @@
 #include "math.h"
 
 typedef struct t_xtime {
-  int year; int month;  int day;  
-  int hour; int minute;  int second;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
 } _xtime ;
- 
+
 #define xMINUTE   (60             ) //1????
 #define xHOUR      (60*xMINUTE) //1?????
 #define xDAY        (24*xHOUR   ) //1????
@@ -16,5 +20,5 @@ typedef struct t_xtime {
 
 unsigned int  xDate2Seconds(_xtime *time);
 
-#endif 
+#endif
 

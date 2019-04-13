@@ -17,6 +17,7 @@
 #include "led.h"
 #include "key.h"
 #include "lcd.h"
+#include "usart2.h"
 #include "usart3.h"
 #include "wdg.h"
 #include "gps.h"
@@ -32,5 +33,5 @@ extern void LED0_off(void);
 extern void LED1_on(void);
 extern void LED1_off(void);
 
-#endif 
+#endif
 

@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "key.h"
 #include "string.h"
+#include "GPS_Ctrl.h"
 
 void BL_GPRS_SEND_task(void *pvParameters);
 void BL_GPRS_REC_task(void *pvParameters);

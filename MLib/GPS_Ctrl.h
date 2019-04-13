@@ -6,6 +6,7 @@
 #include "OSInclude.h"
 #include "lcd.h"
 #include "delay.h"
+#include "usart2.h"
 
 #include "time_shift.h"
 
@@ -18,5 +19,6 @@ void time_transfer(void);
 extern int status_gps;
 extern _xtime UTC_time;
 extern nmea_msg gpsx;
+extern unsigned int Unix_time;
 
 #endif

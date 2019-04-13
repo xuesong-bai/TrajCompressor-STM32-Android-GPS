@@ -1,5 +1,5 @@
 #ifndef __LED_H
-#define __LED_H	 
+#define __LED_H
 #include "sys.h"
 
 #define LED0 PBout(5)// PB5
@@ -12,5 +12,5 @@ void LED0_off(void);
 void LED1_on(void);
 void LED1_off(void);
 
-		 				    
+
 #endif
