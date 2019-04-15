@@ -28,25 +28,29 @@ void Gps_Msg_Show(void)
     tp=gpsx.speed;
     sprintf((char *)dtbuf,"Speed:%.3fkm/h     ",tp/=1000);		    		//得到速度字符串
     LCD_ShowString(30,200,200,16,16,dtbuf);
+		tp=gpsx.direction;
+		sprintf((char *)dtbuf,"Direction:%.1f   ",tp/=1000);	//显示方向
+    LCD_ShowString(30,220,200,16,16,dtbuf);
     if(gpsx.fixmode<=3)														//定位状态
     {
         sprintf((char *)dtbuf,"Fix Mode:%s",fixmode_tbl[gpsx.fixmode]);
-        LCD_ShowString(30,220,200,16,16,dtbuf);
+        LCD_ShowString(30,240,200,16,16,dtbuf);
     }
     sprintf((char *)dtbuf,"GPS+BD Valid satellite:%02d",gpsx.posslnum);	 		//用于定位的GPS卫星数
-    LCD_ShowString(30,240,200,16,16,dtbuf);
-    sprintf((char *)dtbuf,"GPS Visible satellite:%02d",gpsx.svnum%100);	 		//可见GPS卫星数
     LCD_ShowString(30,260,200,16,16,dtbuf);
-
-    sprintf((char *)dtbuf,"BD Visible satellite:%02d",gpsx.beidou_svnum%100);	 		//可见北斗卫星数
+    sprintf((char *)dtbuf,"GPS Visible satellite:%02d",gpsx.svnum%100);	 		//可见GPS卫星数
     LCD_ShowString(30,280,200,16,16,dtbuf);
 
-    sprintf((char *)dtbuf,"UTC Date:%04d/%02d/%02d   ",gpsx.utc.year,gpsx.utc.month,gpsx.utc.date);	//显示UTC日期
+    sprintf((char *)dtbuf,"BD Visible satellite:%02d",gpsx.beidou_svnum%100);	 		//可见北斗卫星数
     LCD_ShowString(30,300,200,16,16,dtbuf);
-    sprintf((char *)dtbuf,"UTC Time:%02d:%02d:%02d   ",gpsx.utc.hour,gpsx.utc.min,gpsx.utc.sec);	//显示UTC时间
+		
+    sprintf((char *)dtbuf,"UTC Date:%04d/%02d/%02d   ",gpsx.utc.year,gpsx.utc.month,gpsx.utc.date);	//显示UTC日期
     LCD_ShowString(30,320,200,16,16,dtbuf);
-    sprintf((char *)dtbuf,"UNIX Time:%d   ", Unix_time);	//显示UTC时间
+    sprintf((char *)dtbuf,"UTC Time:%02d:%02d:%02d   ",gpsx.utc.hour,gpsx.utc.min,gpsx.utc.sec);	//显示UTC时间
     LCD_ShowString(30,340,200,16,16,dtbuf);
+
+		sprintf((char *)dtbuf,"UNIX Time:%d   ", Unix_time);	//显示UTC时间
+    LCD_ShowString(30,360,200,16,16,dtbuf);
 }
 
 
@@ -67,7 +71,7 @@ void gps_task(void *pvParameters)
         if(USART2_RX_STA&(1<<15))		//接收到一次数据了
         {
             t = 0;
-//			IWDG_Feed();
+						IWDG_Feed();
             status_gps = 0;
             rxlen=USART2_RX_STA&0X7FFF;	//得到数据长度
             for(i=0; i<rxlen; i++)TX_BUF[i]=USART2_RX_BUF[i];

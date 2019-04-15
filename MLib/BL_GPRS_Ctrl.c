@@ -5,7 +5,7 @@ u8 Scan_Wtime = 0;//保存蓝牙扫描需要的时间
 u8 BT_Scan_mode=0; //蓝牙扫描设备模式标志
 
 __align(4) u8 dtbuff[50];
-//u8 hold_flag = 0;
+__align(4) u8 serial[50];
 
 //extern _xtime UTC_time;
 //extern nmea_msg gpsx;
@@ -21,7 +21,7 @@ void BL_GPRS_SEND_task(void *pvParameters)
     u8 times = 0;
     float tp1, tp2;
 		USART3_RX_STA = 0;
-    sim800c_send_cmd("ATE0","OK",0);
+    sim800c_send_cmd("ATE1","OK",0);
 		USART3_RX_STA = 0;
     for(;;)
     {
@@ -31,32 +31,36 @@ void BL_GPRS_SEND_task(void *pvParameters)
             times = 0;
 //		CurrentControlTick = xTaskGetTickCount();
 //		IWDG_Feed();
-            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
-
-            if(res==1)
-            {
-                LCD_Fill(30,520,330,540,WHITE);
-                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
-            }
-            else
-            {
-                LCD_Fill(30,520,330,540,WHITE);
-            }
+//            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+						sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+						LCD_Fill(30,520,330,540,WHITE);
+//            if(res==1)
+//            {
+//                LCD_Fill(30,520,330,540,WHITE);
+//                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
+//            }
+//            else
+//            {
+//                LCD_Fill(30,520,330,540,WHITE);
+//            }
 //			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
 //			  sendcnt++;
 //			  if(sendcnt>99) sendcnt = 0;
             tp1 = gpsx.longitude;
             tp2 = gpsx.latitude;
             sprintf((char*)sendbuf,"T:%i,Lo:%.5f,La:%.5f \r\n\32",Unix_time, tp1/=100000, tp2/=100000);
-            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
-            if(res==0)
-            {
-                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
-            }
-            else
-            {
-                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
-            }
+//            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+						sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+						LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+//            if(res==0)
+//            {
+//                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+//            }
+//            else
+//            {
+//                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
+//								delay_ms(10000);
+//            }
         }
 
 
@@ -120,6 +124,10 @@ void BL_GPRS_REC_task(void *pvParameters)
                     }
                 }
             }
+						else
+						{
+							p3 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
+						}
 //						sprintf((char *)dtbuff,"%i",time2);
 //						LCD_ShowString(30,560,300,16,16,dtbuff);
 						USART3_RX_STA=0;
@@ -290,6 +298,7 @@ void BL_GPRS_Msg_Show()
         p1=(u8*)strstr((const char*)(USART3_RX_BUF+2),"\r\n");//查找回车
         p1[0]=0;//加入结束符
         sprintf((char *)dtbuff,"Serial:%s",USART3_RX_BUF+2);
+				sprintf((char *)serial,"%s",USART3_RX_BUF+2);
         //Show_Str(30,440,300,16,dtbuff,16,0);
         LCD_ShowString(30,440,300,16,16,dtbuff);
         USART3_RX_STA=0;

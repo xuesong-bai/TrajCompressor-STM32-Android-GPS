@@ -220,6 +220,15 @@ void NMEA_GNRMC_Analysis(nmea_msg *gpsx,u8 *buf)
 	}
 	posx=NMEA_Comma_Pos(p1,6);								//东经还是西经
 	if(posx!=0XFF)gpsx->ewhemi=*(p1+posx);		 
+	/***************************************************************************/
+	posx=NMEA_Comma_Pos(p1,8);               //得到方向
+	if(posx!=0XFF)
+	{
+		gpsx->direction=NMEA_Str2num(p1+posx,&dx);
+		if(dx<3)gpsx->direction*=NMEA_Pow(10,3-dx);	 	 		//确保扩大1000倍
+	}
+	
+	/***************************************************************************/
 	posx=NMEA_Comma_Pos(p1,9);								//得到UTC日期
 	if(posx!=0XFF)
 	{
