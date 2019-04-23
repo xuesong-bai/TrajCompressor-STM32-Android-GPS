@@ -10,6 +10,7 @@ u8 ctrl_Init(void)
 //	usmart_dev.init(72);		//初始化USMART
     LED_Init();         //初始化与LED连接的硬件接口
     LCD_Init();			   		//初始化LCD
+		BEEP_Init();         	//初始化蜂鸣器端口
     KEY_Init();					//初始化按键
     usart3_init(115200);		//初始化串口3
     LED0_on();

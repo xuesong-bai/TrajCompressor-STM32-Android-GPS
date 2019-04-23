@@ -16,8 +16,8 @@ void BL_GPRS_SEND_task(void *pvParameters)
     portTickType CurrentControlTick = 0;
     const TickType_t TimeIncrement = pdMS_TO_TICKS(10);
     u8 sendbuf[100];
-    u8 sendcnt=0;
-    u8 res;
+//    u8 sendcnt=0;
+//    u8 res;
     u8 times = 0;
     float tp1, tp2;
 		USART3_RX_STA = 0;
@@ -88,10 +88,10 @@ void BL_GPRS_REC_task(void *pvParameters)
 //						LCD_ShowString(30,540,300,16,16,dtbuff);
 //						sim800c_check_cmd("Data");
 
-            p3 =(u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
-			
-            if(p3!=NULL)
-            {
+//            p3 =(u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
+//			
+//            if(p3!=NULL)
+//            {
 //								time2++;
 //								if(time2>100) time2 = 0;
 
@@ -102,6 +102,7 @@ void BL_GPRS_REC_task(void *pvParameters)
                 p1 =(u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
                 if(p1!=NULL)
                 {
+									
 //										LCD_ShowString(30,560,300,16,16,"Receive Data");
                     p2 = (u8*)strstr((const char *)p1,"\x0d\x0a");
                     if(p2!= NULL)
@@ -121,13 +122,33 @@ void BL_GPRS_REC_task(void *pvParameters)
                     if(p1!=NULL)
                     {
                         LCD_ShowString(30,560,300,16,16,"BlueTooth Disconnect.");
+												BEEP=1;		  
                     }
+										else
+										{
+												p1 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
+												if(p1==NULL)
+												{
+														LCD_ShowString(30,560,300,16,16,"Send Failure");
+														LCD_Fill(30, 600, 330, 660, WHITE);
+														sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+														LCD_ShowString(30,600,300,60,16,dtbuff);
+														usart3_init(115200);
+														BEEP=1;		  
+												}
+												else
+												{
+													BEEP = 0;
+												}
+										}
+										
                 }
-            }
-						else
-						{
-							p3 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
-						}
+//            }
+//						else
+//						{
+//							p3 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
+//							
+//						}
 //						sprintf((char *)dtbuff,"%i",time2);
 //						LCD_ShowString(30,560,300,16,16,dtbuff);
 						USART3_RX_STA=0;
@@ -364,13 +385,18 @@ void BL_GPRS_Msg_Show()
 u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 {
     u8 res=0;
-    u8 *p1;
+//    u8 *p1;
 //	u8 i;
 //	USART3_RX_STA=0;
     if((u32)cmd<=0XFF)
     {
-        while((USART3->SR&0X40)==0);//等待上一次数据发送完成
-        USART3->DR=(u32)cmd;
+        while((USART3->SR&0X40)==0)
+				{
+					vTaskDelay(1);
+				}//等待上一次数据发送完成
+				u3_printf("%s\r\n",cmd);//发送命令
+//        while((USART3->SR&0X40)==0);
+//				USART3->DR=(u32)cmd;
     } else u3_printf("%s\r\n",cmd);//发送命令
 //    LCD_Fill(30, 620, 330, 640, WHITE);
 //    sprintf((char *)dtbuff,"%s",cmd);

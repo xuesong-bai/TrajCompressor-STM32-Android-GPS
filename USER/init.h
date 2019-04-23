@@ -21,6 +21,8 @@
 #include "usart3.h"
 #include "wdg.h"
 #include "gps.h"
+#include "beep.h"
+//----------MLib--------------
 #include "GPS_Ctrl.h"
 #include "BL_GPRS_CTRL.h"
 

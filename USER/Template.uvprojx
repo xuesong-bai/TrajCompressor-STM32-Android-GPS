@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART2;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;..\HARDWARE\LED;..\HARDWARE\GPS;..\HARDWARE\KEY;..\HARDWARE\LCD;..\HARDWARE\USART2;..\HARDWARE\USART3;..\HARDWARE\TIMER;..\HARDWARE\WDG;..\MLib;..\HARDWARE\BEEP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -497,6 +497,11 @@
               <FileName>usart2.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\USART2\usart2.c</FilePath>
+            </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\BEEP\beep.c</FilePath>
             </File>
           </Files>
         </Group>
