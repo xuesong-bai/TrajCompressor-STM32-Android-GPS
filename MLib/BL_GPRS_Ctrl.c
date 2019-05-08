@@ -126,20 +126,26 @@ void BL_GPRS_REC_task(void *pvParameters)
                     }
 										else
 										{
-												p1 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
+												p1 = (u8*)strstr((const char*)USART3_RX_BUF,">");
 												if(p1==NULL)
 												{
-														LCD_ShowString(30,560,300,16,16,"Send Failure");
-														LCD_Fill(30, 600, 330, 660, WHITE);
-														sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
-														LCD_ShowString(30,600,300,60,16,dtbuff);
-														usart3_init(115200);
-														BEEP=1;		  
+														p1 =(u8*)strstr((const char*)USART3_RX_BUF,"OK");
+														if(p1==NULL)
+														{
+																LCD_ShowString(30,560,300,16,16,"Send Failure");
+																LCD_Fill(30, 600, 330, 660, WHITE);
+																sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+																LCD_ShowString(30,600,300,60,16,dtbuff);
+																usart3_init(115200);
+																BEEP=1;		  
+														}
+														else
+														{
+																BEEP = 0;
+														}
 												}
-												else
-												{
-													BEEP = 0;
-												}
+												
+
 										}
 										
                 }
