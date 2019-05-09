@@ -56,7 +56,7 @@ void Gps_Msg_Show(void)
 
 
 
-void gps_task(void *pvParameters)
+void GPS_task(void *pvParameters)
 {
     portTickType CurrentControlTick = 0;
     const TickType_t TimeIncrement = pdMS_TO_TICKS(50);

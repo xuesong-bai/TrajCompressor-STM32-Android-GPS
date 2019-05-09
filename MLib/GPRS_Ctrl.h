@@ -1,5 +1,5 @@
-#ifndef __BL_GPRS_CTRL__
-#define __BL_GPRS_CTRL__
+#ifndef __GPRS_CTRL__
+#define __GPRS_CTRL__
 
 #include "sys.h"
 #include "wdg.h"
@@ -13,10 +13,10 @@
 #include "GPS_Ctrl.h"
 #include "beep.h"
 
-void BL_GPRS_SEND_task(void *pvParameters);
-void BL_GPRS_REC_task(void *pvParameters);
-u8 BL_GPRS_Init(void);
-void BL_GPRS_Msg_Show(void);
+void GPRS_task(void *pvParameters);
+void GPRS_REC_task(void *pvParameters);
+u8 GPRS_Init(void);
+void GPRS_Msg_Show(void);
 //void sim_at_response(u8 mode);
 u8 connect_BL(void);
 u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime);

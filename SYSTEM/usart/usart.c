@@ -1,5 +1,10 @@
 #include "sys.h"
 #include "usart.h"	  
+#include "delay.h"
+#include "stdarg.h"
+#include "stdio.h"
+#include "string.h"
+#include "timer.h"
 ////////////////////////////////////////////////////////////////////////////////// 	 
 //如果使用ucos,则包括下面的头文件即可.
 #if SYSTEM_SUPPORT_OS
@@ -69,11 +74,12 @@ int GetKey (void)  {
 //串口1中断服务程序
 //注意,读取USARTx->SR能避免莫名其妙的错误   	
 u8 USART_RX_BUF[USART_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
+u8 USART_TX_BUF[USART_SEND_LEN];
 //接收状态
 //bit15，	接收完成标志
 //bit14，	接收到0x0d
 //bit13~0，	接收到的有效字节数目
-u16 USART_RX_STA=0;       //接收状态标记	  
+vu16 USART_RX_STA=0;       //接收状态标记	  
   
 void uart_init(u32 bound){
 	//GPIO端口设置
@@ -113,35 +119,50 @@ void uart_init(u32 bound){
 	USART_Init(USART1, &USART_InitStructure); //初始化串口1
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//开启串口接受中断
 	USART_Cmd(USART1, ENABLE);                    //使能串口1 
+	
+	TIM5_Int_Init(99,7199);
+	USART_RX_STA=0;
+	TIM_Cmd(TIM5,DISABLE);
 }
 
 void USART1_IRQHandler(void)                	//串口1中断服务程序
 {
-	u8 Res;
-
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
-		{
-		Res =USART_ReceiveData(USART1);	//读取接收到的数据
-		
-		if((USART_RX_STA&0x8000)==0)//接收未完成
+	u8 res;	      
+	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+	{	 
+		res =USART_ReceiveData(USART1);		 
+		if((USART_RX_STA&(1<<15))==0)
+		{ 
+			if(USART_RX_STA<USART_REC_LEN)	
 			{
-			if(USART_RX_STA&0x4000)//接收到了0x0d
+				TIM_SetCounter(TIM5,0);				
+				if(USART_RX_STA==0) 				
 				{
-				if(Res!=0x0a)USART_RX_STA=0;//接收错误,重新开始
-				else USART_RX_STA|=0x8000;	//接收完成了 
+					TIM_Cmd(TIM5,ENABLE);
 				}
-			else //还没收到0X0D
-				{	
-				if(Res==0x0d)USART_RX_STA|=0x4000;
-				else
-					{
-					USART_RX_BUF[USART_RX_STA&0X3FFF]=Res ;
-					USART_RX_STA++;
-					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;//接收数据错误,重新开始接收	  
-					}		 
-				}
-			}   		 
-     } 
-} 
+				USART_RX_BUF[USART_RX_STA++]=res;	
+			}else 
+			{
+				USART_RX_STA|=1<<15;			
+			} 
+		}
+	}  				 											 
+}   
+
+
+void u1_printf(char* fmt,...)  
+{  
+	u16 i,j; 
+	va_list ap; 
+	va_start(ap,fmt);
+	vsprintf((char*)USART_TX_BUF,fmt,ap);
+	va_end(ap);
+	i=strlen((const char*)USART_TX_BUF);		//?????????
+	for(j=0;j<i;j++)							//??????
+	{
+	  while(USART_GetFlagStatus(USART1,USART_FLAG_TC)==RESET); //????,??????   
+		USART_SendData(USART1,USART_TX_BUF[j]); 
+	} 
+}
 #endif	
 

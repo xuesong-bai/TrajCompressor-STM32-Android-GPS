@@ -3,6 +3,7 @@
 
 #include "init.h"
 #include "GPS_Ctrl.h"
+#include "BL_Ctrl.h"
 
 #define TRUE	1
 #define FLASE 0

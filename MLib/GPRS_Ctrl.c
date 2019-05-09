@@ -1,4 +1,4 @@
-#include "BL_GPRS_Ctrl.h"
+#include "GPRS_Ctrl.h"
 
 
 u8 Scan_Wtime = 0;//保存蓝牙扫描需要的时间
@@ -11,7 +11,7 @@ __align(4) u8 serial[50];
 //extern nmea_msg gpsx;
 
 
-void BL_GPRS_SEND_task(void *pvParameters)
+void GPRS_task(void *pvParameters)
 {
     portTickType CurrentControlTick = 0;
     const TickType_t TimeIncrement = pdMS_TO_TICKS(10);
@@ -25,43 +25,43 @@ void BL_GPRS_SEND_task(void *pvParameters)
 		USART3_RX_STA = 0;
     for(;;)
     {
-        times++;
-        if(times == 100)
-        {
-            times = 0;
-//		CurrentControlTick = xTaskGetTickCount();
-//		IWDG_Feed();
-//            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
-						sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
-						LCD_Fill(30,520,330,540,WHITE);
-//            if(res==1)
-//            {
-//                LCD_Fill(30,520,330,540,WHITE);
-//                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
-//            }
-//            else
-//            {
-//                LCD_Fill(30,520,330,540,WHITE);
-//            }
-//			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
-//			  sendcnt++;
-//			  if(sendcnt>99) sendcnt = 0;
-            tp1 = gpsx.longitude;
-            tp2 = gpsx.latitude;
-            sprintf((char*)sendbuf,"T:%i,Lo:%.5f,La:%.5f \r\n\32",Unix_time, tp1/=100000, tp2/=100000);
-//            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
-						sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
-						LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
-//            if(res==0)
-//            {
-//                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
-//            }
-//            else
-//            {
-//                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
-//								delay_ms(10000);
-//            }
-        }
+//        times++;
+//        if(times == 100)
+//        {
+//            times = 0;
+////		CurrentControlTick = xTaskGetTickCount();
+////		IWDG_Feed();
+////            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+//						sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+//						LCD_Fill(30,520,330,540,WHITE);
+////            if(res==1)
+////            {
+////                LCD_Fill(30,520,330,540,WHITE);
+////                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
+////            }
+////            else
+////            {
+////                LCD_Fill(30,520,330,540,WHITE);
+////            }
+////			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
+////			  sendcnt++;
+////			  if(sendcnt>99) sendcnt = 0;
+//            tp1 = gpsx.longitude;
+//            tp2 = gpsx.latitude;
+//            sprintf((char*)sendbuf,"T:%i,Lo:%.5f,La:%.5f \r\n\32",Unix_time, tp1/=100000, tp2/=100000);
+////            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+//						sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+//						LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+////            if(res==0)
+////            {
+////                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+////            }
+////            else
+////            {
+////                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
+////								delay_ms(10000);
+////            }
+//        }
 
 
 //		vTaskDelay(10);
@@ -69,7 +69,7 @@ void BL_GPRS_SEND_task(void *pvParameters)
     }
 
 }
-void BL_GPRS_REC_task(void *pvParameters)
+void GPRS_REC_task(void *pvParameters)
 {
     portTickType CurrentControlTick = 0;
     const TickType_t TimeIncrement = pdMS_TO_TICKS(5);
@@ -247,12 +247,12 @@ u8 connect_BL()
     return status;
 }
 
-u8 BL_GPRS_Init()
+u8 GPRS_Init()
 {
     u8 status = 0;
     u8 res;
     POINT_COLOR=BLACK;
-    LCD_ShowString(30,100,300,16,16,"GPRS-BlueTooth Setting...");
+    LCD_ShowString(30,100,300,16,16,"GPRS Setting...");
     USART3_RX_STA = 0;
     while(sim800c_send_cmd("AT","OK",100))
     {
@@ -261,35 +261,35 @@ u8 BL_GPRS_Init()
         delay_ms(400);
         USART3_RX_STA = 0;
     }
-    LCD_ShowString(30,100,300,16,16,"GPRS-BlueTooth Set Done!!");
+    LCD_ShowString(30,100,300,16,16,"GPRS Set Done!!");
     USART3_RX_STA = 0;
     sim800c_send_cmd("ATE0","OK",200);//不回显
     USART3_RX_STA=0;
 
     delay_ms(50);
-    BL_GPRS_Msg_Show();
-    do
-    {
-        USART3_RX_STA = 0;
-        res = connect_BL();
-        sprintf((char *)dtbuff, "BL result: %i", res);
-        LCD_ShowString(30,520,300,16,16,dtbuff);
-    } while(res==2);
-    if(res==1)
-    {
-        status = 1;
-    }
+    GPRS_Msg_Show();
+//    do
+//    {
+//        USART3_RX_STA = 0;
+//        res = connect_BL();
+//        sprintf((char *)dtbuff, "BL result: %i", res);
+//        LCD_ShowString(30,520,300,16,16,dtbuff);
+//    } while(res==2);
+//    if(res==1)
+//    {
+//        status = 1;
+//    }
     USART3_RX_STA = 0;
     sim800c_send_cmd("ATE1","OK",200);
     USART3_RX_STA = 0;
     return status;
 }
-void BL_GPRS_Msg_Show()
+void GPRS_Msg_Show()
 {
     u8 *p1, *p2;
     u8 res;
     POINT_COLOR=RED;
-    LCD_ShowString(30,380,300,16,16,"BlueTooth + GPRS Data:");
+    LCD_ShowString(30,380,300,16,16,"GPRS Data:");
     POINT_COLOR=BLUE;
     USART3_RX_STA=0;
     res = sim800c_send_cmd("AT+CGMI","OK",200);
@@ -335,7 +335,7 @@ void BL_GPRS_Msg_Show()
         USART3_RX_STA=0;
         res = sim800c_send_cmd("AT+CPIN?","OK",200);	//查询SIM卡是否在位
         sprintf((char *)dtbuff, "SIM result: %i", res);
-        LCD_ShowString(30,660,300,16,16,dtbuff);
+        LCD_ShowString(30,460,300,16,16,dtbuff);
         USART3_RX_STA=0;
     } while(res == 1);
     do {
@@ -343,7 +343,7 @@ void BL_GPRS_Msg_Show()
         USART3_RX_STA=0;
         res = sim800c_send_cmd("AT+COPS?","OK",200);	//查询运营商名字
         sprintf((char *)dtbuff, "ISP result: %i", res);
-        LCD_ShowString(30,680,300,16,16,dtbuff);
+        LCD_ShowString(30,480,300,16,16,dtbuff);
         USART3_RX_STA=0;
     } while(res == 1);
     delay_ms(10);
@@ -352,7 +352,7 @@ void BL_GPRS_Msg_Show()
         USART3_RX_STA=0;
         res = sim800c_send_cmd("AT+CNUM","+CNUM",200);
         sprintf((char *)dtbuff, "NUM result: %i", res);
-        LCD_ShowString(30,680,300,16,16,dtbuff);
+        LCD_ShowString(30,500,300,16,16,dtbuff);
         USART3_RX_STA=0;
     } while(res == 1);
     if(res==0)//查询本机号码
@@ -363,7 +363,7 @@ void BL_GPRS_Msg_Show()
         p1=(u8*)strstr((const char*)(USART3_RX_BUF),",");
         sprintf((char *)dtbuff,"Phone:%s",p1+2);
         //Show_Str(30,460,300,16,dtbuff,16,0);
-        LCD_ShowString(30,460,300,16,16,dtbuff);
+        LCD_ShowString(30,520,300,16,16,dtbuff);
         USART3_RX_STA=0;
     }
 }

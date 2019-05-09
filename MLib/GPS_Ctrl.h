@@ -10,7 +10,7 @@
 
 #include "time_shift.h"
 
-void gps_task(void *pvParameters);
+void GPS_task(void *pvParameters);
 void Gps_Msg_Show(void);
 void gps_Init(void);
 void time_transfer(void);

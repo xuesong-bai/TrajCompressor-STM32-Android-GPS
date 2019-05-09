@@ -6,7 +6,7 @@ u8 ctrl_Init(void)
     u8 status = 0;
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //设置中断优先级分组为组2：2位抢占优先级，2位响应优先级
     delay_init();	    	 //延时函数初始化
-    uart_init(115200);	 //串口初始化为115200
+    uart_init(9600);	 //串口初始化为115200
 //	usmart_dev.init(72);		//初始化USMART
     LED_Init();         //初始化与LED连接的硬件接口
     LCD_Init();			   		//初始化LCD
@@ -25,10 +25,18 @@ u8 ctrl_Init(void)
 
 
     /*------------GPRS + Bluetooth--------------*/
+		do
+    {
+			status = BL_init();
+    } while(status==1);
+		
+		
     do
     {
-        status = BL_GPRS_Init();
+        status = GPRS_Init();
     } while(status==1);
+		
+
 
     /*--------------Watch Dog-------------------*/
 		IWDG_Init(4,1250);    //与分频数为64,重载值为625,溢出时间为1s

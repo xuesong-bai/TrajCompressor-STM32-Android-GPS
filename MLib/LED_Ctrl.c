@@ -7,8 +7,7 @@ void led_task(void *pvParameters)
     const TickType_t TimeIncrement = pdMS_TO_TICKS(500);
     for(;;)
     {
-//		CurrentControlTick = xTaskGetTickCount();
-
+				IWDG_Feed();
         if(status_gps == 0)
         {
             LED0_off();
