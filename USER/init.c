@@ -13,6 +13,7 @@ u8 ctrl_Init(void)
 		BEEP_Init();         	//初始化蜂鸣器端口
     KEY_Init();					//初始化按键
     usart3_init(115200);		//初始化串口3
+		usart2_init(38400);
     LED0_on();
     LED1_on();
 

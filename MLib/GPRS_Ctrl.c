@@ -4,7 +4,8 @@
 u8 Scan_Wtime = 0;//保存蓝牙扫描需要的时间
 u8 BT_Scan_mode=0; //蓝牙扫描设备模式标志
 
-__align(4) u8 dtbuff[50];
+__align(4) u8 dtbuff[400];
+__align(4) u8 gprsbuf[300]; 
 __align(4) u8 serial[50];
 
 //extern _xtime UTC_time;
@@ -14,17 +15,140 @@ __align(4) u8 serial[50];
 void GPRS_task(void *pvParameters)
 {
     portTickType CurrentControlTick = 0;
-    const TickType_t TimeIncrement = pdMS_TO_TICKS(10);
+    const TickType_t TimeIncrement = pdMS_TO_TICKS(4000);
     u8 sendbuf[100];
-//    u8 sendcnt=0;
-//    u8 res;
+    u8 sendcnt=0;
+    u8 res;
+		u8 test_count=0;
     u8 times = 0;
+		u8 * p1;
     float tp1, tp2;
 		USART3_RX_STA = 0;
     sim800c_send_cmd("ATE1","OK",0);
 		USART3_RX_STA = 0;
+	sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+	sim800c_send_cmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"","OK",100);
+	sim800c_send_cmd("AT+SAPBR=3,1,\"APN\",\"CMNET\"","OK",100);
+	sim800c_send_cmd("AT+SAPBR=1,1","OK",300);
+	sim800c_send_cmd("AT+HTTPTERM","OK",100);
+	delay_ms(200);
+	
+	sim800c_send_cmd("AT+HTTPINIT","OK",100);
     for(;;)
     {
+			if(recv_flag)
+			{
+//				sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+//				sim800c_send_cmd("AT+HTTPTERM","OK",0);
+				test_count = 0;
+//				do
+//				{
+//					if(test_count>5)
+//					{
+//						test_count++;
+//						break;
+//					}
+//					res = sim800c_send_cmd("AT+HTTPINIT","OK",100);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+				do
+				{
+					if(test_count>5)
+					{
+						test_count++;
+						break;
+					}
+					res = sim800c_send_cmd("AT+HTTPPARA=\"CID\",1","OK",100);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				do
+				{
+					if(test_count>5)
+					{
+						test_count++;
+						break;
+					}
+					res = sim800c_send_cmd("AT+HTTPPARA=\"CONTENT\",\"application/json\"","OK",100);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				do
+				{
+					if(test_count>5)
+					{
+						test_count++;
+						break;
+					}
+					res = sim800c_send_cmd("AT+HTTPPARA=\"URL\",\"http://120.78.167.211:10086/STM32/upload\"","OK",100);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				sprintf((char*)gprsbuf, "{\"Edge\":[{\"id\":%s,\"time\":%s,\"edge\":\"%s\"}]}", serial, BL_time, BL_road);
+				do
+				{
+					if(test_count>5)
+					{
+						test_count++;
+						break;
+					}
+					res = sim800c_send_cmd("AT+HTTPDATA=500,1000","DOWNLOAD",1000);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				do
+				{
+					if(test_count>5)
+					{
+						test_count++;
+						break;
+					}
+					res = sim800c_send_cmd(gprsbuf,"OK",1000);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				LCD_ShowString(30,680,300,16,16,gprsbuf);
+				do
+				{
+					if(test_count>5)break;
+					res = sim800c_send_cmd("AT+HTTPACTION=1","OK",100);
+					test_count++;
+				}while(res == 1);
+				test_count--;
+				res = sim800c_send_cmd("AT+HTTPREAD","OK",1000);
+			if(res == 0)
+			{
+				recv_flag = 0;
+				sendcnt++;
+				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
+				LCD_ShowString(30,660,300,16,16,dtbuff);
+//				p1 = (u8*)strstr((const char*)USART3_RX_BUF,"200");
+//				if(p1!=NULL)
+//				{
+//					recv_flag = 0;
+//				sendcnt++;
+//				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
+//				LCD_ShowString(30,660,300,16,16,dtbuff);
+//				}
+//				else
+//				{
+//					LCD_ShowString(30,660,300,16,16,"Send failed.1");
+//				}
+			}
+			else
+			{
+				LCD_ShowString(30,660,300,16,16,"Send failed.2");
+			}
+//			sim800c_send_cmd("AT+HTTPTERM","OK",100);
+//			sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+			}
+			
+			sprintf((char*)gprsbuf, "%i", test_count);
+			LCD_Fill(30,640,330,660,WHITE);
+			LCD_ShowString(30,640,300,16,16,gprsbuf);
+			
+			
 //        times++;
 //        if(times == 100)
 //        {
@@ -388,61 +512,100 @@ void GPRS_Msg_Show()
 //waittime:等待时间(单位:10ms)
 //返回值:0,发送成功(得到了期待的应答结果)
 //       1,发送失败
+//u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
+//{
+//    u8 res=0;
+////    u8 *p1;
+////	u8 i;
+////	USART3_RX_STA=0;
+//    if((u32)cmd<=0XFF)
+//    {
+//        while((USART3->SR&0X40)==0)
+//				{
+//					vTaskDelay(1);
+//				}//等待上一次数据发送完成
+//				u3_printf("%s\r\n",cmd);//发送命令
+////        while((USART3->SR&0X40)==0);
+////				USART3->DR=(u32)cmd;
+//    } else u3_printf("%s\r\n",cmd);//发送命令
+////    LCD_Fill(30, 620, 330, 640, WHITE);
+////    sprintf((char *)dtbuff,"%s",cmd);
+////    LCD_ShowString(30,620,300,16,16,dtbuff);
+
+//    if(waittime==1100)//11s后读回串口数据(蓝牙扫描模式)
+//    {
+//        Scan_Wtime = 11;//需要定时的时间
+//        TIM7_SetARR(9999);//产生1S定时中断
+
+//    }
+//    if(ack&&waittime)		//需要等待应答
+//    {
+//        while(--waittime)	//等待倒计时
+//        {
+////		  if(BT_Scan_mode)//蓝牙扫描模式
+////		  {
+////			  res=KEY_Scan(0);//返回上一级
+////			  if(res==WKUP_PRES)return 2;
+////		  }
+//            delay_ms(10);
+//            if(USART3_RX_STA&0X8000)//接收到期待的应答结果
+//            {
+//                if(sim800c_check_cmd(ack))break;//得到有效数据
+////			  p1 = (u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
+////				if(p1!=NULL)
+////				{
+//////					for(i = 0;i<USART3_MAX_RECV_LEN;i++)
+//////					{
+//////						USART3_RX_BUFF[i] = USART3_RX_BUF[i];
+//////					}
+////					delay_ms(10);
+////				}
+//                USART3_RX_STA=0;
+//            }
+//        }
+//        if(waittime==0)res=1;
+//    }
+//    return res;
+//}
+
 u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 {
-    u8 res=0;
-//    u8 *p1;
-//	u8 i;
-//	USART3_RX_STA=0;
-    if((u32)cmd<=0XFF)
-    {
-        while((USART3->SR&0X40)==0)
-				{
-					vTaskDelay(1);
-				}//等待上一次数据发送完成
-				u3_printf("%s\r\n",cmd);//发送命令
-//        while((USART3->SR&0X40)==0);
-//				USART3->DR=(u32)cmd;
-    } else u3_printf("%s\r\n",cmd);//发送命令
-//    LCD_Fill(30, 620, 330, 640, WHITE);
-//    sprintf((char *)dtbuff,"%s",cmd);
-//    LCD_ShowString(30,620,300,16,16,dtbuff);
-
-    if(waittime==1100)//11s后读回串口数据(蓝牙扫描模式)
-    {
-        Scan_Wtime = 11;//需要定时的时间
-        TIM7_SetARR(9999);//产生1S定时中断
-
-    }
-    if(ack&&waittime)		//需要等待应答
-    {
-        while(--waittime)	//等待倒计时
-        {
-//		  if(BT_Scan_mode)//蓝牙扫描模式
-//		  {
-//			  res=KEY_Scan(0);//返回上一级
-//			  if(res==WKUP_PRES)return 2;
-//		  }
-            delay_ms(10);
-            if(USART3_RX_STA&0X8000)//接收到期待的应答结果
-            {
-                if(sim800c_check_cmd(ack))break;//得到有效数据
-//			  p1 = (u8*)strstr((const char*)USART3_RX_BUF,"DATA: ");
-//				if(p1!=NULL)
-//				{
-////					for(i = 0;i<USART3_MAX_RECV_LEN;i++)
-////					{
-////						USART3_RX_BUFF[i] = USART3_RX_BUF[i];
-////					}
-//					delay_ms(10);
-//				}
-                USART3_RX_STA=0;
-            }
-        }
-        if(waittime==0)res=1;
-    }
-    return res;
+	u8 res=0; 
+	USART3_RX_STA=0;
+	if((u32)cmd<=0XFF)
+	{
+		while((USART3->SR&0X40)==0);//等待上一次数据发送完成  
+		USART3->DR=(u32)cmd;
+	}else u3_printf("%s\r\n",cmd);//发送命令
+	
+	if(waittime==1100)//11s后读回串口数据(蓝牙扫描模式)
+	{
+		 Scan_Wtime = 11;//需要定时的时间
+		 TIM7_SetARR(9999);//产生1S定时中断
+		 
+	}
+	if(ack&&waittime)		//需要等待应答
+	{
+	   while(--waittime)	//等待倒计时
+	   { 
+		  if(BT_Scan_mode)//蓝牙扫描模式
+		  {  
+			  res=KEY_Scan(0);//返回上一级
+			  if(res==WKUP_PRES)return 2;
+		  }
+		  delay_ms(10);
+		  if(USART3_RX_STA&0X8000)//接收到期待的应答结果
+		  {
+			  if(sim800c_check_cmd(ack))break;//得到有效数据 
+			  USART3_RX_STA=0;
+		  } 
+	   }
+	   if(waittime==0)res=1; 
+	}
+	return res;
 }
+
+
 u8* sim800c_check_cmd(u8 *str)
 {
     char *strx=0;
@@ -450,9 +613,9 @@ u8* sim800c_check_cmd(u8 *str)
     {
         USART3_RX_BUF[USART3_RX_STA&0X7FFF]=0;//添加结束符
         strx=strstr((const char*)USART3_RX_BUF,(const char*)str);
-//				LCD_Fill(30, 600, 330, 620, WHITE);
-//				sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
-//				LCD_ShowString(30,600,300,60,16,dtbuff);
+				LCD_Fill(30, 700, 330, 720, WHITE);
+				sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+				LCD_ShowString(30,700,300,60,16,dtbuff);
     }
     return (u8*)strx;
 }

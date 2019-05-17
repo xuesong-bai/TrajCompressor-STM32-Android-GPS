@@ -3,7 +3,7 @@
 extern TaskHandle_t StartTask_Handler;
 
 
-#define GPS_TASK_PRIO 3
+#define GPS_TASK_PRIO 6
 #define GPS_STK_SIZE 512
 TaskHandle_t GPSTask_Handler;
 
@@ -34,12 +34,12 @@ void start_task(void *pvParameters)
                 (UBaseType_t    )GPS_TASK_PRIO,
                 (TaskHandle_t*  )&GPSTask_Handler);
 
-//    xTaskCreate((TaskFunction_t )GPRS_task,
-//                (const char*    )"GPRS_task",
-//                (uint16_t       )GPRS_STK_SIZE,
-//                (void*          )NULL,
-//                (UBaseType_t    )GPRS_TASK_PRIO,
-//                (TaskHandle_t*  )&GPRS_Task_Handler);
+    xTaskCreate((TaskFunction_t )GPRS_task,
+                (const char*    )"GPRS_task",
+                (uint16_t       )GPRS_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )GPRS_TASK_PRIO,
+                (TaskHandle_t*  )&GPRS_Task_Handler);
 
     xTaskCreate((TaskFunction_t )BL_SEND_task,
                 (const char*    )"BL_SEND_task",

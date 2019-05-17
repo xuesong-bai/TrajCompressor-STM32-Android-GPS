@@ -11,6 +11,7 @@
 #include "key.h"
 #include "string.h"
 #include "GPS_Ctrl.h"
+#include "BL_Ctrl.h"
 #include "beep.h"
 
 void GPRS_task(void *pvParameters);
