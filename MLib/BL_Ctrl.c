@@ -49,7 +49,7 @@ void BL_SEND_task(void *pvParameters)
 void BL_RECV_task(void *pvParameters)
 {
 	portTickType CurrentControlTick = 0;
-  const TickType_t TimeIncrement = pdMS_TO_TICKS(100);
+  const TickType_t TimeIncrement = pdMS_TO_TICKS(500);
 	u8 *p1;
 //	u8 reclen=0;  	
   for(;;)

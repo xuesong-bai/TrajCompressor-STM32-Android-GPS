@@ -12,35 +12,111 @@ __align(4) u8 serial[50];
 //extern nmea_msg gpsx;
 
 
+
 void GPRS_task(void *pvParameters)
 {
-    portTickType CurrentControlTick = 0;
-    const TickType_t TimeIncrement = pdMS_TO_TICKS(4000);
+		portTickType CurrentControlTick = 0;
+    const TickType_t TimeIncrement = pdMS_TO_TICKS(1000);
     u8 sendbuf[100];
     u8 sendcnt=0;
     u8 res;
 		u8 test_count=0;
     u8 times = 0;
+		u8 ack[] = "success";
 		u8 * p1;
+		u16 waittime;
     float tp1, tp2;
+		char *strx=0;
+		sprintf((char *)serial,"%i",1);
 		USART3_RX_STA = 0;
-    sim800c_send_cmd("ATE1","OK",0);
-		USART3_RX_STA = 0;
-	sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
-	sim800c_send_cmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"","OK",100);
-	sim800c_send_cmd("AT+SAPBR=3,1,\"APN\",\"CMNET\"","OK",100);
-	sim800c_send_cmd("AT+SAPBR=1,1","OK",300);
-	sim800c_send_cmd("AT+HTTPTERM","OK",100);
-	delay_ms(200);
-	
-	sim800c_send_cmd("AT+HTTPINIT","OK",100);
-    for(;;)
-    {
+		for(;;)
+		{
 			if(recv_flag)
 			{
-//				sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
-//				sim800c_send_cmd("AT+HTTPTERM","OK",0);
-				test_count = 0;
+			sprintf((char*)gprsbuf, "{\"Edge\":[{\"id\":%s,\"time\":%s,\"edge\":\"%s\"}]}", serial, BL_time, BL_road);
+			USART3_RX_STA=0;
+			if((u32)gprsbuf<=0XFF)
+			{
+				while((USART3->SR&0X40)==0);//等待上一次数据发送完成  
+				USART3->DR=(u32)gprsbuf;
+			}else u3_printf("%s\r\n",gprsbuf);//发送命令
+			waittime = 500;
+			while(--waittime)	//等待倒计时
+			{ 
+				delay_ms(10);
+				if(USART3_RX_STA&0X8000)//接收到期待的应答结果
+				{
+					USART3_RX_BUF[USART3_RX_STA&0X7FFF]=0;
+					strx=strstr((const char*)USART3_RX_BUF,(const char*)ack);
+					LCD_Fill(30, 700, 330, 720, WHITE);
+					sprintf((char *)dtbuff,"%s",USART3_RX_BUF);
+					LCD_ShowString(30,700,300,60,16,dtbuff);
+					if((u8*)strx)break;//得到有效数据 
+					USART3_RX_STA=0;
+				} 
+			}
+			if(waittime > 0) 
+			{
+				recv_flag = 0;
+				sendcnt++;
+				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
+				LCD_ShowString(30,660,300,16,16,dtbuff);
+			}
+			else
+			{
+				LCD_ShowString(30,660,300,16,16,"Send failed.2");
+			}
+			LCD_Fill(30,640,330,680,WHITE);
+			LCD_ShowString(30,640,300,40,16,gprsbuf);
+			
+			
+			
+		}
+			vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
+		}
+}
+
+// SIM800C
+//void GPRS_task(void *pvParameters)
+//{
+//    portTickType CurrentControlTick = 0;
+//    const TickType_t TimeIncrement = pdMS_TO_TICKS(4000);
+//    u8 sendbuf[100];
+//    u8 sendcnt=0;
+//    u8 res;
+//		u8 test_count=0;
+//    u8 times = 0;
+//		u8 * p1;
+//    float tp1, tp2;
+//		USART3_RX_STA = 0;
+//    sim800c_send_cmd("ATE1","OK",0);
+//		USART3_RX_STA = 0;
+//	sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+//	sim800c_send_cmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"","OK",100);
+//	sim800c_send_cmd("AT+SAPBR=3,1,\"APN\",\"CMNET\"","OK",100);
+//	sim800c_send_cmd("AT+SAPBR=1,1","OK",300);
+//	sim800c_send_cmd("AT+HTTPTERM","OK",100);
+//	delay_ms(200);
+//	
+//	sim800c_send_cmd("AT+HTTPINIT","OK",100);
+//    for(;;)
+//    {
+//			if(recv_flag)
+//			{
+////				sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+////				sim800c_send_cmd("AT+HTTPTERM","OK",0);
+//				test_count = 0;
+////				do
+////				{
+////					if(test_count>5)
+////					{
+////						test_count++;
+////						break;
+////					}
+////					res = sim800c_send_cmd("AT+HTTPINIT","OK",100);
+////					test_count++;
+////				}while(res == 1);
+////				test_count--;
 //				do
 //				{
 //					if(test_count>5)
@@ -48,151 +124,140 @@ void GPRS_task(void *pvParameters)
 //						test_count++;
 //						break;
 //					}
-//					res = sim800c_send_cmd("AT+HTTPINIT","OK",100);
+//					res = sim800c_send_cmd("AT+HTTPPARA=\"CID\",1","OK",100);
 //					test_count++;
 //				}while(res == 1);
 //				test_count--;
-				do
-				{
-					if(test_count>5)
-					{
-						test_count++;
-						break;
-					}
-					res = sim800c_send_cmd("AT+HTTPPARA=\"CID\",1","OK",100);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				do
-				{
-					if(test_count>5)
-					{
-						test_count++;
-						break;
-					}
-					res = sim800c_send_cmd("AT+HTTPPARA=\"CONTENT\",\"application/json\"","OK",100);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				do
-				{
-					if(test_count>5)
-					{
-						test_count++;
-						break;
-					}
-					res = sim800c_send_cmd("AT+HTTPPARA=\"URL\",\"http://120.78.167.211:10086/STM32/upload\"","OK",100);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				sprintf((char*)gprsbuf, "{\"Edge\":[{\"id\":%s,\"time\":%s,\"edge\":\"%s\"}]}", serial, BL_time, BL_road);
-				do
-				{
-					if(test_count>5)
-					{
-						test_count++;
-						break;
-					}
-					res = sim800c_send_cmd("AT+HTTPDATA=500,1000","DOWNLOAD",1000);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				do
-				{
-					if(test_count>5)
-					{
-						test_count++;
-						break;
-					}
-					res = sim800c_send_cmd(gprsbuf,"OK",1000);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				LCD_ShowString(30,680,300,16,16,gprsbuf);
-				do
-				{
-					if(test_count>5)break;
-					res = sim800c_send_cmd("AT+HTTPACTION=1","OK",100);
-					test_count++;
-				}while(res == 1);
-				test_count--;
-				res = sim800c_send_cmd("AT+HTTPREAD","OK",1000);
-			if(res == 0)
-			{
-				recv_flag = 0;
-				sendcnt++;
-				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
-				LCD_ShowString(30,660,300,16,16,dtbuff);
-//				p1 = (u8*)strstr((const char*)USART3_RX_BUF,"200");
-//				if(p1!=NULL)
+//				do
 //				{
-//					recv_flag = 0;
+//					if(test_count>5)
+//					{
+//						test_count++;
+//						break;
+//					}
+//					res = sim800c_send_cmd("AT+HTTPPARA=\"CONTENT\",\"application/json\"","OK",100);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+//				do
+//				{
+//					if(test_count>5)
+//					{
+//						test_count++;
+//						break;
+//					}
+//					res = sim800c_send_cmd("AT+HTTPPARA=\"URL\",\"http://120.78.167.211:10086/STM32/upload\"","OK",100);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+//				sprintf((char*)gprsbuf, "{\"Edge\":[{\"id\":%s,\"time\":%s,\"edge\":\"%s\"}]}", serial, BL_time, BL_road);
+//				do
+//				{
+//					if(test_count>5)
+//					{
+//						test_count++;
+//						break;
+//					}
+//					res = sim800c_send_cmd("AT+HTTPDATA=500,1000","DOWNLOAD",1000);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+//				do
+//				{
+//					if(test_count>5)
+//					{
+//						test_count++;
+//						break;
+//					}
+//					res = sim800c_send_cmd(gprsbuf,"OK",1000);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+//				LCD_ShowString(30,680,300,16,16,gprsbuf);
+//				do
+//				{
+//					if(test_count>5)break;
+//					res = sim800c_send_cmd("AT+HTTPACTION=1","OK",100);
+//					test_count++;
+//				}while(res == 1);
+//				test_count--;
+//				res = sim800c_send_cmd("AT+HTTPREAD","OK",1000);
+//			if(res == 0)
+//			{
+//				recv_flag = 0;
 //				sendcnt++;
 //				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
 //				LCD_ShowString(30,660,300,16,16,dtbuff);
-//				}
-//				else
-//				{
-//					LCD_ShowString(30,660,300,16,16,"Send failed.1");
-//				}
-			}
-			else
-			{
-				LCD_ShowString(30,660,300,16,16,"Send failed.2");
-			}
-//			sim800c_send_cmd("AT+HTTPTERM","OK",100);
-//			sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
-			}
-			
-			sprintf((char*)gprsbuf, "%i", test_count);
-			LCD_Fill(30,640,330,660,WHITE);
-			LCD_ShowString(30,640,300,16,16,gprsbuf);
-			
-			
-//        times++;
-//        if(times == 100)
-//        {
-//            times = 0;
-////		CurrentControlTick = xTaskGetTickCount();
-////		IWDG_Feed();
-////            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
-//						sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
-//						LCD_Fill(30,520,330,540,WHITE);
-////            if(res==1)
-////            {
-////                LCD_Fill(30,520,330,540,WHITE);
-////                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
-////            }
-////            else
-////            {
-////                LCD_Fill(30,520,330,540,WHITE);
-////            }
-////			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
-////			  sendcnt++;
-////			  if(sendcnt>99) sendcnt = 0;
-//            tp1 = gpsx.longitude;
-//            tp2 = gpsx.latitude;
-//            sprintf((char*)sendbuf,"T:%i,Lo:%.5f,La:%.5f \r\n\32",Unix_time, tp1/=100000, tp2/=100000);
-////            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
-//						sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
-//						LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
-////            if(res==0)
-////            {
-////                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
-////            }
-////            else
-////            {
-////                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
-////								delay_ms(10000);
-////            }
-//        }
+////				p1 = (u8*)strstr((const char*)USART3_RX_BUF,"200");
+////				if(p1!=NULL)
+////				{
+////					recv_flag = 0;
+////				sendcnt++;
+////				sprintf((char*)dtbuff,"GPRS test %d \r\n\32",sendcnt);
+////				LCD_ShowString(30,660,300,16,16,dtbuff);
+////				}
+////				else
+////				{
+////					LCD_ShowString(30,660,300,16,16,"Send failed.1");
+////				}
+//			}
+//			else
+//			{
+//				LCD_ShowString(30,660,300,16,16,"Send failed.2");
+//			}
+////			sim800c_send_cmd("AT+HTTPTERM","OK",100);
+////			sim800c_send_cmd("AT+SAPBR=0,1","OK",100);
+//			}
+//			
+//			sprintf((char*)gprsbuf, "%i", test_count);
+//			LCD_Fill(30,640,330,660,WHITE);
+//			LCD_ShowString(30,640,300,16,16,gprsbuf);
+//			
+//			
+////        times++;
+////        if(times == 100)
+////        {
+////            times = 0;
+//////		CurrentControlTick = xTaskGetTickCount();
+//////		IWDG_Feed();
+//////            res = sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+////						sim800c_send_cmd("AT+BTSPPSEND",">",0);//发送数据
+////						LCD_Fill(30,520,330,540,WHITE);
+//////            if(res==1)
+//////            {
+//////                LCD_Fill(30,520,330,540,WHITE);
+//////                LCD_ShowString(30,520,300,16,16,"BTSPPSEND Failed.");
+//////            }
+//////            else
+//////            {
+//////                LCD_Fill(30,520,330,540,WHITE);
+//////            }
+//////			  sprintf((char*)sendbuf,"Bluetooth test %d \r\n\32",sendcnt);
+//////			  sendcnt++;
+//////			  if(sendcnt>99) sendcnt = 0;
+////            tp1 = gpsx.longitude;
+////            tp2 = gpsx.latitude;
+////            sprintf((char*)sendbuf,"T:%i,Lo:%.5f,La:%.5f \r\n\32",Unix_time, tp1/=100000, tp2/=100000);
+//////            res = sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+////						sim800c_send_cmd((u8*)sendbuf,"OK",0);//发送数据
+////						LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+//////            if(res==0)
+//////            {
+//////                LCD_ShowString(30,520,300,16,16,(u8*)sendbuf);//显示发送的数据
+//////            }
+//////            else
+//////            {
+//////                LCD_ShowString(30,520,300,16,16,"BlueTooth Disconnect.");
+//////								delay_ms(10000);
+//////            }
+////        }
 
 
-//		vTaskDelay(10);
-        vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
-    }
+////		vTaskDelay(10);
+//        vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
+//    }
 
-}
+//}
 void GPRS_REC_task(void *pvParameters)
 {
     portTickType CurrentControlTick = 0;
@@ -371,43 +436,82 @@ u8 connect_BL()
     return status;
 }
 
+
 u8 GPRS_Init()
 {
-    u8 status = 0;
-    u8 res;
-    POINT_COLOR=BLACK;
-    LCD_ShowString(30,100,300,16,16,"GPRS Setting...");
-    USART3_RX_STA = 0;
-    while(sim800c_send_cmd("AT","OK",100))
-    {
-        USART3_RX_STA = 0;
-        sim800c_send_cmd("ATE0","OK",200);
-        delay_ms(400);
-        USART3_RX_STA = 0;
-    }
-    LCD_ShowString(30,100,300,16,16,"GPRS Set Done!!");
-    USART3_RX_STA = 0;
-    sim800c_send_cmd("ATE0","OK",200);//不回显
-    USART3_RX_STA=0;
+		u16 waittime;
+		u8 status = 0;
+		u8 * p1;
+		POINT_COLOR=BLACK;
+		LCD_ShowString(30,100,300,16,16,"GPRS Setting...");
+		sprintf((char*)gprsbuf, "AT+SN");
+		USART3_RX_STA=0;
+		if((u32)gprsbuf<=0XFF)
+		{
+			while((USART3->SR&0X40)==0);//等待上一次数据发送完成  
+			USART3->DR=(u32)gprsbuf;
+		}else u3_printf("%s\r\n",gprsbuf);//发送命令
+		waittime = 500;
+		while(--waittime)	//等待倒计时
+		{ 
+			delay_ms(10);
+			if(USART3_RX_STA&0X8000)//接收到期待的应答结果
+			{
+				USART3_RX_BUF[USART3_RX_STA&0X7FFF]=0;
+				p1=(u8*)strstr((const char*)(USART3_RX_BUF+2),"\r\n");//查找回车
+        p1[0]=0;//加入结束符
+        sprintf((char *)dtbuff,"Serial:%s",USART3_RX_BUF+2);
+				sprintf((char *)serial,"%s",USART3_RX_BUF+2);
+				break;
+			} 
+		}
+		if(waittime==0)
+		{
+			status = 1;
+		}
+	
+	return status;
+}
 
-    delay_ms(50);
-    GPRS_Msg_Show();
-//    do
+//u8 GPRS_Init()
+//{
+//    u8 status = 0;
+//    u8 res;
+//    POINT_COLOR=BLACK;
+//    LCD_ShowString(30,100,300,16,16,"GPRS Setting...");
+//    USART3_RX_STA = 0;
+//    while(sim800c_send_cmd("AT","OK",100))
 //    {
 //        USART3_RX_STA = 0;
-//        res = connect_BL();
-//        sprintf((char *)dtbuff, "BL result: %i", res);
-//        LCD_ShowString(30,520,300,16,16,dtbuff);
-//    } while(res==2);
-//    if(res==1)
-//    {
-//        status = 1;
+//        sim800c_send_cmd("ATE0","OK",200);
+//        delay_ms(400);
+//        USART3_RX_STA = 0;
 //    }
-    USART3_RX_STA = 0;
-    sim800c_send_cmd("ATE1","OK",200);
-    USART3_RX_STA = 0;
-    return status;
-}
+//    LCD_ShowString(30,100,300,16,16,"GPRS Set Done!!");
+//    USART3_RX_STA = 0;
+//    sim800c_send_cmd("ATE0","OK",200);//不回显
+//    USART3_RX_STA=0;
+
+//    delay_ms(50);
+//    GPRS_Msg_Show();
+////    do
+////    {
+////        USART3_RX_STA = 0;
+////        res = connect_BL();
+////        sprintf((char *)dtbuff, "BL result: %i", res);
+////        LCD_ShowString(30,520,300,16,16,dtbuff);
+////    } while(res==2);
+////    if(res==1)
+////    {
+////        status = 1;
+////    }
+//    USART3_RX_STA = 0;
+//    sim800c_send_cmd("ATE1","OK",200);
+//    USART3_RX_STA = 0;
+//    return status;
+//}
+
+
 void GPRS_Msg_Show()
 {
     u8 *p1, *p2;
@@ -582,7 +686,6 @@ u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 	{
 		 Scan_Wtime = 11;//需要定时的时间
 		 TIM7_SetARR(9999);//产生1S定时中断
-		 
 	}
 	if(ack&&waittime)		//需要等待应答
 	{

@@ -31,11 +31,13 @@ u8 ctrl_Init(void)
 			status = BL_init();
     } while(status==1);
 		
+		delay_ms(10000);
 		
-    do
-    {
-        status = GPRS_Init();
-    } while(status==1);
+//    do
+//    {
+//        status = GPRS_Init();
+//    } while(status==1);
+	
 		
 
 
