@@ -40,7 +40,7 @@ void BL_SEND_task(void *pvParameters)
 		sprintf((char*)sendbuf,"T:%i,Lo:%.2f,La:%.2f,SP:%0.2f,DR:%0.2f\r\n\32",Unix_time, tp1/100000, tp2/100000,tp3/100000,tp4/100000);
 		LCD_ShowString(30,560,300,16,16,sendbuf); 
 //		u1_printf("T:%i,Lo:%.5f,La:%.5f\r\n",Unix_time, tp1/=100000, tp2/=100000);
-		u1_printf("%i,%.2f,%.2f,%0.2f,%i",Unix_time, tp1/=100000, tp2/=100000,tp3/=100000,(int) tp4);
+		u1_printf("%i,%0.5f,%0.5f,%0.5f,%0.5f",Unix_time, tp1/=100000, tp2/=100000,tp3/=100000,tp4);
 		
 		vTaskDelayUntil(&CurrentControlTick, TimeIncrement);
   }
