@@ -1,0 +1,6 @@
+Flask
+flask-restplus
+gevent==1.2.2
+gunicorn==19.7.1
+PyMySQL==0.9.3
+loguru
